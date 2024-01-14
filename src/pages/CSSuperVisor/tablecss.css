@@ -1,0 +1,21 @@
+@tailwind components;
+
+@layer components {
+  .cs-row {
+    @apply w-full flex items-center bg-white border-b-[1px] border-slate-200/90  h-[45px] shrink-0 grow-0;
+  }
+  .cs-cell {
+    @apply p-1 align-middle h-full text-nowrap overflow-hidden shrink-0 grow-0 flex items-center justify-start;
+  }
+
+  .revert {
+    @apply rotate-[180deg];
+  }
+
+  .no-revert {
+    @apply rotate-[0deg];
+  }
+  .selected-status {
+    @apply rounded-lg bg-pink-300/50;
+  }
+}

@@ -1,0 +1,253 @@
+{
+  "CustomerService": [
+    {
+      "name": "CS_A",
+      "id": "CS_A",
+      "history": [
+        {
+          "customerName": "Customer AA1",
+          "customerID": "Customer_AA1",
+          "mailAddress": "aa1@testdemo.com",
+          "address": "東京都港区六本木1-1-1",
+          "customerSatisfaction": "A"
+        },
+        {
+          "customerName": "Customer AA2",
+          "customerID": "Customer_AA2",
+          "mailAddress": "aa2@testdemo.com",
+          "address": "東京都港区六本木1-1-1",
+          "customerSatisfaction": "B"
+        },
+        {
+          "customerName": "Customer AA1",
+          "customerID": "Customer_AA1",
+          "mailAddress": "aa1@testdemo.com",
+          "address": "東京都港区六本木1-1-1",
+          "customerSatisfaction": "C"
+        }
+      ],
+      "CSEvaluation": {
+        "review": "処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析",
+        "conclusion": "どの処理フェーズにうまく対応できる。"
+      }
+    }
+  ],
+  "Customer": [
+    {
+      "customerService": "CS_A",
+      "customerID": "Customer_AA1",
+      "customerName": "Customer AA1",
+      "mailAddress": "aa1@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "1"
+    },
+    {
+      "customerService": "CS_A",
+      "customerID": "Customer_AA2",
+      "customerName": "Customer AA2",
+      "mailAddress": "aa2@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "2"
+    },
+    {
+      "customerService": "CS_A",
+      "customerID": "Customer_AA3",
+      "customerName": "Customer AA3",
+      "mailAddress": "aa3@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "3"
+    },
+    {
+      "customerService": "CS_A",
+      "customerID": "Customer_AA4",
+      "customerName": "Customer AA4",
+      "mailAddress": "aa4@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "4"
+    },
+    {
+      "customerService": "CS_B",
+      "customerID": "Customer_BB1",
+      "customerName": "Customer BB1",
+      "mailAddress": "BB1@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "5"
+    },
+    {
+      "customerService": "CS_B",
+      "customerID": "Customer_BB2",
+      "customerName": "Customer BB2",
+      "mailAddress": "B2@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "6"
+    },
+    {
+      "customerService": "CS_B",
+      "customerID": "Customer_BB3",
+      "customerName": "Customer BB3",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "mailAddress": "B2@testdemo.com",
+      "status": "3"
+    },
+    {
+      "customerService": "CS_B",
+      "customerID": "Customer_BB4",
+      "customerName": "Customer BB4",
+      "mailAddress": "B2@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "3"
+    },
+    {
+      "customerService": "CS_C",
+      "customerID": "Customer_CC1",
+      "customerName": "Customer CC1",
+      "mailAddress": "CC1@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "3"
+    },
+    {
+      "customerService": "CS_C",
+      "customerID": "Customer_CC2",
+      "customerName": "Customer CC2",
+      "mailAddress": "CC2@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "1"
+    },
+    {
+      "customerService": "CS_C",
+      "customerID": "Customer_CC3",
+      "customerName": "Customer CC3",
+      "mailAddress": "CC3@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "3"
+    },
+    {
+      "customerService": "CS_C",
+      "customerID": "Customer_CC4",
+      "customerName": "Customer CC4",
+      "mailAddress": "CC3@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "2"
+    },
+    {
+      "customerService": "CS_C",
+      "customerID": "Customer_CC5",
+      "customerName": "Customer CC5",
+      "mailAddress": "CC5@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "1"
+    },
+    {
+      "customerService": "CS_C",
+      "customerID": "Customer_CC6",
+      "customerName": "Customer CC6",
+      "mailAddress": "CC6@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "3"
+    },
+    {
+      "customerService": "CS_C",
+      "customerID": "Customer_CC7",
+      "customerName": "Customer CC7",
+      "mailAddress": "CC7@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "2"
+    },
+    {
+      "customerService": "",
+      "customerID": "Customer_CC8",
+      "customerName": "Customer CC8",
+      "mailAddress": "CC8@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "1"
+    },
+    {
+      "customerService": "",
+      "customerID": "Customer_D",
+      "customerName": "Customer D",
+      "mailAddress": "D@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "1"
+    },
+    {
+      "customerService": "",
+      "customerID": "Customer_E",
+      "customerName": "Customer E",
+      "mailAddress": "E@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "1"
+    },
+    {
+      "customerService": "",
+      "customerID": "Customer_F",
+      "customerName": "Customer F",
+      "mailAddress": "F@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "1"
+    },
+    {
+      "customerService": "",
+      "customerID": "Customer_G",
+      "customerName": "Customer G",
+      "mailAddress": "G@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "1"
+    },
+    {
+      "customerService": "",
+      "customerID": "Customer_H",
+      "customerName": "Customer H",
+      "mailAddress": "H@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "1"
+    },
+    {
+      "customerService": "",
+      "customerID": "Customer_I",
+      "customerName": "Customer I",
+      "mailAddress": "I@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "1"
+    },
+    {
+      "customerService": "",
+      "customerID": "Customer_J",
+      "customerName": "Customer J",
+      "mailAddress": "J@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "1"
+    },
+    {
+      "customerService": "",
+      "customerID": "Customer_K",
+      "customerName": "Customer K",
+      "mailAddress": "K@testdemo.com",
+      "address": "東京都新宿区",
+      "telephone": "030-1234-5678",
+      "status": "1"
+    }
+  ]
+}
