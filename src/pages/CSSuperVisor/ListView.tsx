@@ -29,6 +29,7 @@ import {
   Droppable,
 } from "react-beautiful-dnd";
 import { toast } from "sonner";
+import { Collapse } from "@/components/ui/collapse";
 
 type CustomerInfo = {
   customerService: string;
@@ -359,7 +360,7 @@ const CustomerList = React.memo(({ customers }: CustomerListProps) => {
                   <div
                     onClick={() => setSelectedStatus(status)}
                     className={clsx(
-                      "w-full h-full relative text-wrap text-center text-zinc-800 flex items-center leading-4 px-2 hover:bg-pink-300/10"
+                      "w-full h-full rounded-lg relative text-wrap text-center text-zinc-800 flex items-center leading-4 px-2 hover:bg-pink-300/10"
                     )}
                   >
                     {selectedStatus === status && (
@@ -672,6 +673,8 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
 
   console.log(sortedLeftList);
 
+  const [open, setOpen] = React.useState<-1 | 0 | 1>(0);
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div
@@ -680,16 +683,22 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
           "flex overflow-auto"
         )}
       >
-        <section className="h-[fit-content]">
-          <CustomerServiceList customersWithCs={sortedLeftList} />
-        </section>
+        <motion.section className="h-full overflow-auto flex-shrink-0">
+          <div className="">
+            <CustomerServiceList customersWithCs={sortedLeftList} />
+          </div>
+        </motion.section>
         <section className="h-full flex flex-col justify-center gap-48 bg-zinc-400/30 sticky top-0">
-          <ChevronsLeft className="w-5 h-5 mx-auto text-zinc-900/50" />
-          <ChevronsRight className="w-5 h-5 mx-auto text-zinc-900/50" />
+          <Button variant="ghost" className="mx-auto p-0 h-[fit-content]">
+            <ChevronsLeft className="w-5 h-5 mx-auto text-zinc-900/50" />
+          </Button>
+          <Button variant="ghost" className="mx-auto p-0 h-[fit-content]">
+            <ChevronsRight className="w-5 h-5 mx-auto text-zinc-900/50" />
+          </Button>
         </section>
-        <section className="h-[fit-content]">
+        <motion.section className="h-full overflow-auto">
           <CustomerList customers={sortedRightList} />
-        </section>
+        </motion.section>
       </div>
     </DragDropContext>
   );
