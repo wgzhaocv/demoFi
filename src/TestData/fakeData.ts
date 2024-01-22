@@ -1,29 +1,29 @@
 import { CsStatusId } from "@/lib/status";
-import { base, ja, Faker } from "@faker-js/faker";
+import { base, en, ja, Faker } from "@faker-js/faker";
 import localforage from "localforage";
 
 export const faker = new Faker({
-  locale: [base, ja],
+  locale: [base, en],
 });
 
-type CustomerSubaccount = [
+export type CustomerSubaccount = [
   {
     customerID: string;
     FXID: string;
-    FXStatus: number;
+    FXStatus: 1 | 2 | 3;
   },
   {
     customerID: string;
     BOID: string;
-    BOStatus: number;
+    BOStatus: 1 | 2 | 3;
   }
 ];
 
 const generateCustomerSubaccount = (customerID: string): CustomerSubaccount => {
   const FXID = faker.finance.accountNumber(5) + " FX";
-  const FXStatus = faker.number.int({ min: 1, max: 3 });
+  const FXStatus = faker.number.int({ min: 1, max: 3 }) as 1 | 2 | 3;
   const BOID = faker.finance.accountNumber(5) + " BO";
-  const BOStatus = faker.number.int({ min: 1, max: 3 });
+  const BOStatus = faker.number.int({ min: 1, max: 3 }) as 1 | 2 | 3;
   return [
     {
       customerID,
@@ -66,7 +66,7 @@ const generateCustomerReview = (): CustomerReview => {
   };
 };
 
-type Customer = {
+export type CustomerInfo = {
   customerName: string;
   customerID: string;
   mailAddress: string;
@@ -80,12 +80,13 @@ type Customer = {
   birthdayDD: number;
   subaccounts: CustomerSubaccount;
   review: CustomerReview;
+  customerService: string;
 };
 
-const generateCustomer = (): Customer => {
+const generateCustomer = (customerService = ""): CustomerInfo => {
   const customerName = faker.person.firstName();
   const customerID = faker.finance.accountNumber(5);
-  const mailAddress = faker.internet.email();
+  const mailAddress = "12345@test.com";
   const telephone = faker.phone.number();
   const address = faker.location.streetAddress();
   const status = ("" + faker.number.int({ min: 1, max: 6 })) as CsStatusId;
@@ -116,6 +117,7 @@ const generateCustomer = (): Customer => {
     birthdayDD,
     subaccounts,
     review,
+    customerService,
   };
 };
 const satisfication = ["A", "B", "C"] as const;
@@ -123,7 +125,7 @@ const satisfication = ["A", "B", "C"] as const;
 type CustomerServiceHistoryInfo = {
   customerServiceId: string;
   customers: {
-    customer: Customer;
+    customer: CustomerInfo;
     customersReview: (typeof satisfication)[number];
   }[];
   customerServiceReview: string;
@@ -153,11 +155,11 @@ const generateCustomerServiceHistoryInfo = (
   };
 };
 
-type CustomerService = {
+export type CustomerService = {
   customerService: string;
   customerServiceId: string;
   customerServiceHistoryInfo: CustomerServiceHistoryInfo;
-  customers: Customer[];
+  customers: CustomerInfo[];
 };
 
 const generateCS = (): CustomerService => {
@@ -178,11 +180,13 @@ const generateCS = (): CustomerService => {
   };
 };
 
-const generateCSs = async (n = 10, useNew = false) => {
-  if (!useNew) {
-    return (await localforage.getItem("csList")) as CustomerService[];
+export const generateCSs = async (n = 10, useNew = false) => {
+  const css = (await localforage.getItem("csList")) as CustomerService[];
+  const customers = (await localforage.getItem("cList")) as CustomerInfo[];
+  if (!useNew && css && customers) {
+    return { customerServices: css, customers };
   } else {
-    const customers: Customer[] = [];
+    const customers: CustomerInfo[] = [];
     for (let i = 0; i < 50; i++) {
       customers.push(generateCustomer());
     }
@@ -191,6 +195,9 @@ const generateCSs = async (n = 10, useNew = false) => {
     for (let i = 0; i < n; i++) {
       cs.push(generateCS());
     }
-    return cs;
+    const result = { customerServices: cs, customers };
+    await localforage.setItem("csList", cs);
+    await localforage.setItem("cList", customers);
+    return result;
   }
 };

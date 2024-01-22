@@ -30,22 +30,20 @@ import {
 } from "react-beautiful-dnd";
 import { toast } from "sonner";
 import { Collapse } from "@/components/ui/collapse";
-
-type CustomerInfo = {
-  customerService: string;
-  customerID: string;
-  customerName: string;
-  mailAddress: string;
-  telephone: string;
-  address: string;
-  status: string;
-};
+import {
+  CustomerInfo,
+  CustomerService,
+  CustomerSubaccount,
+  generateCSs,
+} from "@/TestData/fakeData";
 
 type CustomerServiceListProps = {
-  customersWithCs: CustomerInfo[];
+  groupedCustomers: CustomerService[];
 };
 
-const CustomerServiceList = ({ customersWithCs }: CustomerServiceListProps) => {
+const CustomerServiceList = ({
+  groupedCustomers,
+}: CustomerServiceListProps) => {
   const { t } = useTranslation();
   const [cols, setCols] = React.useState<ColsAttr[]>([
     { name: "customerService", deletable: false, link: false },
@@ -55,36 +53,9 @@ const CustomerServiceList = ({ customersWithCs }: CustomerServiceListProps) => {
     { name: "telephone", deletable: false, link: false },
     { name: "status", deletable: false, link: false },
   ]);
-  const groupedCustomers = React.useMemo(() => {
-    const groupCustomer = customersWithCs.reduce(
-      (pre, cur) => {
-        if (pre[cur.customerService]) {
-          pre[cur.customerService].customers.push(cur);
-        } else {
-          pre[cur.customerService] = {
-            customerService: cur.customerService,
-            customers: [cur],
-          };
-        }
-        return pre;
-      },
-      {} as Record<
-        string,
-        {
-          customerService: string;
-          customers: CustomerInfo[];
-        }
-      >
-    );
 
-    const customerGroup = Object.values(groupCustomer).sort((a, b) =>
-      a.customerService.localeCompare(b.customerService)
-    );
-
-    return customerGroup;
-  }, [customersWithCs]);
-
-  const [customerGroup, setCustomerGroup] = React.useState(groupedCustomers);
+  const [customerGroup, setCustomerGroup] =
+    React.useState<CustomerService[]>(groupedCustomers);
 
   useEffect(() => setCustomerGroup(groupedCustomers), [groupedCustomers]);
 
@@ -342,6 +313,7 @@ const CustomerList = React.memo(({ customers }: CustomerListProps) => {
           ref={provided.innerRef}
           style={{ backgroundColor: snapshot.isDraggingOver ? "blue" : "#fff" }}
           {...provided.droppableProps}
+          className="w-[fit-content]"
         >
           <div className="cs-row w-full justify-center sticky top-0 bg-white text-lg z-30">
             <Text size={"4"} weight={"bold"}>
@@ -411,7 +383,7 @@ const CustomerList = React.memo(({ customers }: CustomerListProps) => {
 });
 
 type CustomerDetailRowProps = {
-  customer: CustomerInfo;
+  subacount: CustomerSubaccount[0] | CustomerSubaccount[1];
   cols: CustomeListColsAttr[];
 };
 
@@ -431,14 +403,39 @@ const CustomerDetailRow = React.memo((props: CustomerDetailRowProps) => {
               {i === 1 && (
                 <OptionLink isLink={col.link}>
                   <Text>
-                    {props.customer[col.name]}
-                    {" Test"}
+                    {props.subacount.customerID}{" "}
+                    {"FXID" in props.subacount && props.subacount.FXID}
+                    {"BOID" in props.subacount && props.subacount.BOID}
                   </Text>
                 </OptionLink>
               )}
-              {i === 2 && <>〇未申請</>}
-              {i === 3 && <>◎申し込み</>}
-              {i === 4 && <>〇申請完了</>}
+              {i === 2 &&
+                (("FXStatus" in props.subacount &&
+                  props.subacount.FXStatus === 1) ||
+                ("BOStatus" in props.subacount &&
+                  props.subacount.BOStatus === 1) ? (
+                  <>◎未申請</>
+                ) : (
+                  <>〇未申請</>
+                ))}
+              {i === 3 &&
+                (("FXStatus" in props.subacount &&
+                  props.subacount.FXStatus === 2) ||
+                ("BOStatus" in props.subacount &&
+                  props.subacount.BOStatus === 2) ? (
+                  <>◎申し込み</>
+                ) : (
+                  <>〇申し込み</>
+                ))}
+              {i === 4 &&
+                (("FXStatus" in props.subacount &&
+                  props.subacount.FXStatus === 3) ||
+                ("BOStatus" in props.subacount &&
+                  props.subacount.BOStatus === 3) ? (
+                  <>◎申請完了</>
+                ) : (
+                  <>〇申請完了</>
+                ))}
             </motion.div>
           </React.Fragment>
         ))}
@@ -466,7 +463,7 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
   if ("asTitle" in props) {
     return (
       <motion.div
-        className="cs-row bg-pink-200 sticky top-[90px] z-30"
+        className="w-full cs-row bg-pink-200 sticky top-[90px] z-30"
         layoutRoot
       >
         <AnimatePresence>
@@ -478,22 +475,27 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
                   width: customerListItemWidth[col.name],
                 }}
                 exit={{ width: 0 }}
-                className="cs-cell"
+                className="cs-cell flex justify-center items-center"
               >
-                <Text>{t(col.name)}</Text>
-                {col.deletable && (
-                  <div className="ml-2 flex item-center justify-center">
-                    <IconButton
-                      variant="ghost"
-                      radius="full"
-                      size={"1"}
-                      onClick={() =>
-                        props.setCols((cols) => cols.filter((c) => c !== col))
-                      }
-                    >
-                      <XCircle className="w-4 h-4" />
-                    </IconButton>
-                  </div>
+                <div>
+                  <Text>{t(col.name)}</Text>
+                  {col.deletable && (
+                    <div className="ml-2 flex item-center justify-center">
+                      <IconButton
+                        variant="ghost"
+                        radius="full"
+                        size={"1"}
+                        onClick={() =>
+                          props.setCols((cols) => cols.filter((c) => c !== col))
+                        }
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </IconButton>
+                    </div>
+                  )}
+                </div>
+                {col.name === "customerName" && (
+                  <div className="w-full flex justify-between text-sm">{}</div>
                 )}
               </motion.div>
             </React.Fragment>
@@ -517,7 +519,7 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
 
   const row = React.useMemo(
     () => (
-      <motion.div className="cs-row" layoutRoot>
+      <motion.div className="w-full cs-row" layoutRoot>
         <AnimatePresence>
           {props.cols.map((col) => (
             <React.Fragment key={col.name}>
@@ -566,8 +568,13 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
             animate={{ maxHeight: open ? 90 : 0 }}
             className="w-full flex flex-col overflow-hidden justify-start items-start"
           >
-            <CustomerDetailRow cols={props.cols} customer={props.customer} />
-            <CustomerDetailRow cols={props.cols} customer={props.customer} />
+            {props.customer.subaccounts.map((subaccount, i) => (
+              <CustomerDetailRow
+                key={subaccount.customerID + i}
+                cols={props.cols}
+                subacount={subaccount}
+              />
+            ))}
           </motion.div>
         </div>
       )}
@@ -577,49 +584,41 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
 
 type CSListViewProps = {};
 export const CSListView = React.memo(({}: CSListViewProps) => {
-  console.log(testData);
+  const [leftList, setLeftList] = React.useState<CustomerService[]>([]);
 
-  const { inService: inServiceCustomer, ...Customers } = React.useMemo(() => {
-    return testData.Customer.reduce(
-      (pre, cur) => {
-        if (cur.customerService) {
-          pre.inService.push(cur);
-        } else {
+  const [rightList, setRightList] = React.useState<
+    Record<CsStatusId, CustomerInfo[]>
+  >({
+    "1": [],
+    "2": [],
+    "3": [],
+    "4": [],
+    "5": [],
+    "6": [],
+  });
+
+  useEffect(() => {
+    (async () => {
+      const testData = await generateCSs();
+      setLeftList(testData.customerServices);
+      const customersLists = testData.customers.reduce(
+        (pre, cur) => {
           pre[cur.status as CsStatusId].push(cur);
-        }
-        return pre;
-      },
-      {
-        inService: [],
-        "1": [],
-        "2": [],
-        "3": [],
-        "4": [],
-        "5": [],
-        "6": [],
-      } as Record<"inService" | CsStatusId, CustomerInfo[]>
-    );
+          return pre;
+        },
+        {
+          "1": [],
+          "2": [],
+          "3": [],
+          "4": [],
+          "5": [],
+          "6": [],
+        } as Record<CsStatusId, CustomerInfo[]>
+      );
+      setRightList(customersLists);
+      console.log(testData.customerServices, customersLists);
+    })();
   }, []);
-  const [leftList, setLeftList] =
-    React.useState<CustomerInfo[]>(inServiceCustomer);
-
-  const [rightList, setRightList] =
-    React.useState<Record<CsStatusId, CustomerInfo[]>>(Customers);
-
-  const sortedLeftList = React.useMemo(() => {
-    return Array.from(leftList).sort((a, b) => {
-      return a.customerService.localeCompare(b.customerService);
-    });
-  }, [leftList]);
-
-  const sortedRightList = React.useMemo(() => {
-    return Object.entries(rightList).reduce((pre, [key, value]) => {
-      pre[key as CsStatusId] = Array.from(value).sort((a, b) => {
-        return a.customerName.localeCompare(b.customerName);
-      });
-      return pre;
-    }, {} as Record<CsStatusId, CustomerInfo[]>);
-  }, [rightList]);
 
   const handleDragEnd = React.useCallback(
     (result: DropResult) => {
@@ -647,22 +646,22 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
           string
         ];
         const customerIndex = result.source.index;
-        console.log(result, rightList[status], leftList, rightList);
+        //   console.log(result, rightList[status], leftList, rightList);
 
-        const newCustomerArray = Array.from(rightList[status]);
-        const customer = newCustomerArray.splice(customerIndex, 1)[0];
-        setLeftList((pre) => [
-          ...pre,
-          { ...customer, customerService: customerServiceId },
-        ]);
-        setRightList((pre) => ({
-          ...pre,
-          [status]: newCustomerArray,
-        }));
+        //   const newCustomerArray = Array.from(rightList[status]);
+        //   const customer = newCustomerArray.splice(customerIndex, 1)[0];
+        //   setLeftList((pre) => [
+        //     ...pre,
+        //     { ...customer, customerService: customerServiceId },
+        //   ]);
+        //   setRightList((pre) => ({
+        //     ...pre,
+        //     [status]: newCustomerArray,
+        //   }));
 
-        toast.success(
-          `Customer ${customer.customerName} is added to Service ${customerServiceId}`
-        );
+        //   toast.success(
+        //     `Customer ${customer.customerName} is added to Service ${customerServiceId}`
+        //   );
       } catch (error) {
         console.log(error);
         if (error instanceof Error) toast.error(error.message);
@@ -671,7 +670,7 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
     [leftList, rightList]
   );
 
-  console.log(sortedLeftList);
+  //   console.log(sortedLeftList);
 
   const [open, setOpen] = React.useState<-1 | 0 | 1>(0);
 
@@ -685,7 +684,7 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
       >
         <motion.section className="h-full overflow-auto flex-shrink-0">
           <div className="">
-            <CustomerServiceList customersWithCs={sortedLeftList} />
+            <CustomerServiceList groupedCustomers={leftList} />
           </div>
         </motion.section>
         <section className="h-full flex flex-col justify-center gap-48 bg-zinc-400/30 sticky top-0">
@@ -697,7 +696,7 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
           </Button>
         </section>
         <motion.section className="h-full overflow-auto">
-          <CustomerList customers={sortedRightList} />
+          <CustomerList customers={rightList} />
         </motion.section>
       </div>
     </DragDropContext>
