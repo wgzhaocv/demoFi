@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import React, { useEffect, useTransition } from "react";
 import clsx from "clsx";
 import {
@@ -184,7 +185,7 @@ const CustomerServiceRow = React.memo((props: CustomerServiceRowProps) => {
 
   if ("asTitle" in props) {
     return (
-      <motion.div className="cs-row bg-pink-200 sticky top-[45px]" layoutRoot>
+      <motion.div className="cs-row bg-pink-200 sticky top-[45px] z-30" layoutRoot>
         <AnimatePresence>
           {props.cols.map((col, i) => (
             <React.Fragment key={col.name}>
@@ -236,14 +237,14 @@ const CustomerServiceRow = React.memo((props: CustomerServiceRowProps) => {
               layout
               style={{ width: itemWidth[col.name] }}
               exit={{ width: 0 }}
-              className="cs-cell text-wrap leading-4"
+              className="cs-cell text-wrap leading-4 relative first:pr-6"
             >
               {i === 0 ? (
                 <>
-                  <Text>{props.csName}</Text>
+                  <Text className="break-all">{props.csName}</Text>
                   {props.csName && (
                     <motion.div
-                      className="ml-2 flex items-center"
+                      className="ml-2 flex items-center absolute right-1 top-[50%] translateTocenter"
                       animate={{
                         rotate: props.open === false ? "180deg" : "0",
                       }}
@@ -477,7 +478,7 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
                 exit={{ width: 0 }}
                 className="cs-cell flex justify-center items-center"
               >
-                <div>
+                <div className="w-full flex justify-start items-center ">
                   <Text>{t(col.name)}</Text>
                   {col.deletable && (
                     <div className="ml-2 flex item-center justify-center">
@@ -678,7 +679,7 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
     <DragDropContext onDragEnd={handleDragEnd}>
       <div
         className={clsx(
-          "h-[585px] rounded-lg shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/10 relative",
+          "h-[80vh] rounded-lg shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/10 relative",
           "flex overflow-auto"
         )}
       >

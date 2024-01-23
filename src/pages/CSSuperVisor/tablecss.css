@@ -20,6 +20,10 @@
     @apply rounded-lg bg-pink-300/50;
   }
 
+  .translateTocenter {
+    translate:0 -50%;
+  }
+
   /* 自定义滚动条的整体部分 */
   ::-webkit-scrollbar {
     width: 10px; /* 滚动条的宽度 */
