@@ -22,6 +22,8 @@ const resources = {
       telephone: "Telephone",
       address: "Address",
       status: "Status",
+      "Customer is added to Service": "Customer is added to Service ",
+      "Customer is added to status": "Customer is added to status ",
     },
   },
   jp: {
@@ -41,6 +43,9 @@ const resources = {
       status: "ステータス",
       telephone: "電話番号",
       address: "住所",
+      "Customer is added to Service":
+        "お客さん右記のカスタマーサービスに移動しました：",
+      "Customer is added to status": "お客さん右記のステータスに移動しました：",
     },
   },
 };

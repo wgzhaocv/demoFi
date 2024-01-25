@@ -14,7 +14,12 @@ import "./tablecss.css";
 import { useTranslation } from "react-i18next";
 import testData from "@/TestData/CSSuperVisor.json";
 import { CsStatusId, allStatusId, csStatusMap } from "@/lib/status";
-import { AnimatePresence, motion, useWillChange } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  transform,
+  useWillChange,
+} from "framer-motion";
 import {
   CustomerListItemName,
   ItemName,
@@ -26,8 +31,11 @@ import { Button } from "@/components/ui/button";
 import {
   DragDropContext,
   Draggable,
+  DraggableStateSnapshot,
+  DraggingStyle,
   DropResult,
   Droppable,
+  NotDraggingStyle,
 } from "react-beautiful-dnd";
 import { toast } from "sonner";
 import { Collapse } from "@/components/ui/collapse";
@@ -59,8 +67,6 @@ const CustomerServiceList = ({
     React.useState<CustomerService[]>(groupedCustomers);
 
   useEffect(() => setCustomerGroup(groupedCustomers), [groupedCustomers]);
-
-  console.log(">>>>customerGroup", customerGroup[0]);
 
   return (
     <motion.div className="flex flex-col" layoutRoot>
@@ -117,7 +123,6 @@ const CustomerServiceGroup = ({
         <div
           ref={provided.innerRef}
           className={clsx("w-full flex flex-col")}
-          //   style={{ backgroundColor: snapshot.isDraggingOver ? "blue" : "#fff" }}
           {...provided.droppableProps}
         >
           <CustomerServiceRow
@@ -185,7 +190,10 @@ const CustomerServiceRow = React.memo((props: CustomerServiceRowProps) => {
 
   if ("asTitle" in props) {
     return (
-      <motion.div className="cs-row bg-pink-200 sticky top-[45px] z-30" layoutRoot>
+      <motion.div
+        className="cs-row bg-pink-200 sticky top-[45px] z-30"
+        layoutRoot
+      >
         <AnimatePresence>
           {props.cols.map((col, i) => (
             <React.Fragment key={col.name}>
@@ -289,99 +297,134 @@ const CustomerServiceRow = React.memo((props: CustomerServiceRowProps) => {
 
 type CustomerListProps = {
   customers: Record<CsStatusId, CustomerInfo[]>;
+  selectedCustomers: CustomerInfo[];
+  setSelectedCustomers: React.Dispatch<React.SetStateAction<CustomerInfo[]>>;
 };
 
-const CustomerList = React.memo(({ customers }: CustomerListProps) => {
-  const [allStatusTabs, setAllStatusTabs] =
-    React.useState<CsStatusId[]>(allStatusId);
-  const [selectedStatus, setSelectedStatus] = React.useState<CsStatusId>(
-    allStatusId[0]
-  );
+const CustomerList = React.memo(
+  ({
+    customers,
+    selectedCustomers,
+    setSelectedCustomers,
+  }: CustomerListProps) => {
+    const [allStatusTabs, setAllStatusTabs] =
+      React.useState<CsStatusId[]>(allStatusId);
+    const [selectedStatus, setSelectedStatus] = React.useState<CsStatusId>(
+      allStatusId[0]
+    );
 
-  const [cols, setCols] = React.useState<CustomeListColsAttr[]>([
-    { name: "customerName", deletable: false, link: true },
-    { name: "customerID", deletable: true, link: true },
-    { name: "mailAddress", deletable: false, link: false },
-    { name: "telephone", deletable: false, link: false },
-    { name: "address", deletable: false, link: false },
-  ]);
+    const [cols, setCols] = React.useState<CustomeListColsAttr[]>([
+      { name: "customerName", deletable: false, link: true },
+      { name: "customerID", deletable: true, link: true },
+      { name: "mailAddress", deletable: false, link: false },
+      { name: "telephone", deletable: false, link: false },
+      { name: "address", deletable: false, link: false },
+    ]);
 
-  const { t } = useTranslation();
-  return (
-    <Droppable droppableId={"CustomerList"}>
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          style={{ backgroundColor: snapshot.isDraggingOver ? "blue" : "#fff" }}
-          {...provided.droppableProps}
-          className="w-[fit-content]"
-        >
-          <div className="cs-row w-full justify-center sticky top-0 bg-white text-lg z-30">
-            <Text size={"4"} weight={"bold"}>
-              {t("Customer Service List")}
-            </Text>
-          </div>
-          <ul className="cs-row sticky top-[45px] bg-white z-30">
-            <AnimatePresence>
-              {allStatusTabs.map((status) => (
-                <motion.li
-                  key={status}
-                  style={{ width: 150 }}
-                  exit={{ width: 0 }}
-                  className="cs-cell overflow-visible"
-                >
-                  <div
-                    onClick={() => setSelectedStatus(status)}
-                    className={clsx(
-                      "w-full h-full rounded-lg relative text-wrap text-center text-zinc-800 flex items-center leading-4 px-2 hover:bg-pink-300/10"
-                    )}
-                  >
-                    {selectedStatus === status && (
-                      <motion.div
-                        layoutId="statusTabBg"
-                        className={
-                          "absolute inset-0 selected-status pointer-events-none z-[-1]"
-                        }
-                      />
-                    )}
-                    {t(csStatusMap[status])}
-                    <div className="ml-2 flex items-center justify-center">
-                      <IconButton
-                        variant="ghost"
-                        radius="full"
-                        size={"1"}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setAllStatusTabs((tabs) =>
-                            tabs.filter((t) => t !== status)
-                          );
-                        }}
-                      >
-                        <XCircle className="w-4 h-4" />
-                      </IconButton>
-                    </div>
-                  </div>
-                </motion.li>
-              ))}
-            </AnimatePresence>
-          </ul>
-          <CustomerRow asTitle cols={cols} setCols={setCols} />
-          <motion.div className=" flex flex-col w-full">
-            {customers[selectedStatus].map((customer, i) => (
-              <CustomerRow
-                key={customer.customerID}
-                customer={customer}
-                cols={cols}
-                index={i}
-              />
-            ))}
-          </motion.div>
-          {provided.placeholder}
+    const handleCustomerClick = React.useCallback((customer: CustomerInfo) => {
+      return (e: React.MouseEvent) => {
+        if (e.ctrlKey || e.metaKey) {
+          setSelectedCustomers((pre) => {
+            if (pre.includes(customer))
+              return pre.filter((c) => c !== customer);
+            return [...pre, customer];
+          });
+        } else {
+          setSelectedCustomers((pre) => {
+            if (pre.includes(customer)) return [];
+            return [customer];
+          });
+        }
+      };
+    }, []);
+
+    const { t } = useTranslation();
+    return (
+      <div className="w-[fit-content]">
+        <div className="cs-row w-full justify-center sticky top-0 bg-white text-lg z-30">
+          <Text size={"4"} weight={"bold"}>
+            {t("Customer Service List")}
+          </Text>
         </div>
-      )}
-    </Droppable>
-  );
-});
+
+        <ul className="cs-row sticky top-[45px] bg-white z-30">
+          <AnimatePresence>
+            {allStatusTabs.map((status) => (
+              <motion.li
+                key={status}
+                style={{ width: 150 }}
+                exit={{ width: 0 }}
+                className="cs-cell overflow-visible"
+              >
+                <Droppable droppableId={"status:" + status}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      onClick={() => setSelectedStatus(status)}
+                      className={clsx(
+                        "w-full h-full rounded-lg relative text-wrap text-center text-zinc-800 flex items-center leading-4 px-2 hover:bg-pink-300/10",
+                        snapshot.isDraggingOver && "bg-pink-300/10"
+                      )}
+                      {...provided.droppableProps}
+                    >
+                      {selectedStatus === status && (
+                        <motion.div
+                          layoutId="statusTabBg"
+                          className={
+                            "absolute inset-0 selected-status pointer-events-none z-[-1]"
+                          }
+                        />
+                      )}
+                      {t(csStatusMap[status])}
+                      <div className="ml-2 flex items-center justify-center">
+                        <IconButton
+                          variant="ghost"
+                          radius="full"
+                          size={"1"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAllStatusTabs((tabs) =>
+                              tabs.filter((t) => t !== status)
+                            );
+                          }}
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </IconButton>
+                      </div>
+                      <span className="hidden">{provided.placeholder}</span>
+                    </div>
+                  )}
+                </Droppable>
+              </motion.li>
+            ))}
+          </AnimatePresence>
+        </ul>
+        <CustomerRow asTitle cols={cols} setCols={setCols} />
+        <Droppable droppableId={"CustomerList"}>
+          {(provided, snapshot) => (
+            <motion.div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className={clsx("flex flex-col w-full")}
+            >
+              {customers[selectedStatus].map((customer, i) => (
+                <CustomerRow
+                  key={customer.customerID}
+                  customer={customer}
+                  cols={cols}
+                  index={i}
+                  handleCustomerClick={handleCustomerClick}
+                  selected={selectedCustomers.includes(customer)}
+                />
+              ))}
+              {provided.placeholder}
+            </motion.div>
+          )}
+        </Droppable>
+      </div>
+    );
+  }
+);
 
 type CustomerDetailRowProps = {
   subacount: CustomerSubaccount[0] | CustomerSubaccount[1];
@@ -455,6 +498,10 @@ type CustomerRowprops =
       customer: CustomerInfo;
       cols: CustomeListColsAttr[];
       index: number;
+      selected?: boolean;
+      handleCustomerClick: (
+        customer: CustomerInfo
+      ) => (e: React.MouseEvent) => void;
     };
 const CustomerRow = React.memo((props: CustomerRowprops) => {
   const { customerListItemWidth } = useCustomerListItemWStore();
@@ -520,7 +567,11 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
 
   const row = React.useMemo(
     () => (
-      <motion.div className="w-full cs-row" layoutRoot>
+      <motion.div
+        className={clsx("w-full cs-row", props.selected && "bg-pink-300/10")}
+        onClick={props.handleCustomerClick(props.customer)}
+        layoutRoot
+      >
         <AnimatePresence>
           {props.cols.map((col) => (
             <React.Fragment key={col.name}>
@@ -549,8 +600,39 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
         </AnimatePresence>
       </motion.div>
     ),
-    [props.cols, props.customer, customerListItemWidth, handleOpenDetail]
+    [
+      props.cols,
+      props.customer,
+      customerListItemWidth,
+      handleOpenDetail,
+      props.selected,
+      props.handleCustomerClick,
+    ]
   );
+
+  const getStyle = (
+    snapshot: DraggableStateSnapshot,
+    style?: DraggingStyle | NotDraggingStyle
+  ) => {
+    if (!snapshot.isDropAnimating) {
+      return style;
+    }
+    const hoveringId = snapshot.draggingOver;
+    console.log(hoveringId, snapshot.dropAnimation);
+    if (hoveringId?.startsWith("status:")) {
+      return { ...style, transitionDuration: `0.001s` };
+    } else {
+      const { moveTo, curve, duration } = snapshot.dropAnimation!;
+      const translate = `translate(${moveTo.x}px, ${moveTo.y}px)`;
+      console.log(hoveringId, translate);
+
+      return {
+        ...style,
+        transform: `${translate} `,
+        transition: `all ${curve} ${duration + 1}s`,
+      };
+    }
+  };
 
   return (
     <Draggable
@@ -560,9 +642,13 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
-          className="w-full flex flex-col shrink-0 grow-0"
           {...provided.draggableProps}
           {...provided.dragHandleProps}
+          className={clsx(
+            "w-full flex flex-col shrink-0 grow-0 transition-none",
+            snapshot.isDragging && "opacity-50"
+          )}
+          style={getStyle(snapshot, provided.draggableProps.style)}
         >
           {row}
           <motion.div
@@ -617,61 +703,96 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
         } as Record<CsStatusId, CustomerInfo[]>
       );
       setRightList(customersLists);
-      console.log(testData.customerServices, customersLists);
     })();
   }, []);
+
+  const [selectedCustomers, setSelectedCustomers] = React.useState<
+    CustomerInfo[]
+  >([]);
+
+  const { t } = useTranslation();
 
   const handleDragEnd = React.useCallback(
     (result: DropResult) => {
       console.log(result);
 
       try {
-        const customerServiceId = result.destination?.droppableId as string;
+        const droppableId = result.destination?.droppableId as string;
 
         if (!result.destination) return;
-        if (result.destination.droppableId === "CustomerList") {
-          toast.error("Can't move to customer service");
-          return;
+
+        const status = result.draggableId.split(":")[0] as CsStatusId;
+        const customerId = result.draggableId.split(":")[1];
+
+        const customerList = rightList[status];
+        const customer = customerList.find((c) => c.customerID === customerId);
+        const customerListMove: CustomerInfo[] = [];
+        if (selectedCustomers.length <= 1) {
+          customerListMove.push(customer as CustomerInfo);
+        } else {
+          if (!selectedCustomers.includes(customer as CustomerInfo)) {
+            customerListMove.push(customer as CustomerInfo);
+          } else {
+            customerListMove.push(...selectedCustomers);
+          }
         }
 
-        const csList = leftList.filter(
-          (c) => c.customerService === customerServiceId
-        );
-        if (csList.length === 5) {
-          toast.error("Customer Service List is full");
-          return;
+        let newRightList = {
+          ...rightList,
+          [status]: customerList.filter((c) => !customerListMove.includes(c)),
+        };
+
+        if (droppableId.startsWith("status:")) {
+          const newStatus = droppableId.split(":")[1] as CsStatusId;
+
+          if (newStatus !== status) {
+            newRightList = {
+              ...newRightList,
+              [newStatus]: [...newRightList[newStatus], ...customerListMove],
+            };
+            setRightList(newRightList);
+            toast.success(
+              `${t("Customer is added to status")}${csStatusMap[newStatus]}`
+            );
+          }
+        } else {
+          const customerServiceName = droppableId;
+          const customerServiceIndex = leftList.findIndex(
+            (cs) => cs.customerService === customerServiceName
+          );
+          const customerService = leftList[customerServiceIndex];
+          if (!customerService) return;
+
+          const newCustomerService = {
+            ...customerService,
+            customers: [
+              ...customerService.customers,
+              ...customerListMove.map((c) => ({
+                ...c,
+                customerService: customerServiceName,
+              })),
+            ],
+          };
+
+          const newLeftList = [...leftList];
+          newLeftList[customerServiceIndex] = newCustomerService;
+
+          setLeftList(newLeftList);
+          setRightList(newRightList);
+
+          toast.success(
+            `${t("Customer is added to Service")}${
+              customerService.customerService
+            }`
+          );
         }
-
-        const [status, _] = result.draggableId.split(":") as [
-          CsStatusId,
-          string
-        ];
-        const customerIndex = result.source.index;
-        //   console.log(result, rightList[status], leftList, rightList);
-
-        //   const newCustomerArray = Array.from(rightList[status]);
-        //   const customer = newCustomerArray.splice(customerIndex, 1)[0];
-        //   setLeftList((pre) => [
-        //     ...pre,
-        //     { ...customer, customerService: customerServiceId },
-        //   ]);
-        //   setRightList((pre) => ({
-        //     ...pre,
-        //     [status]: newCustomerArray,
-        //   }));
-
-        //   toast.success(
-        //     `Customer ${customer.customerName} is added to Service ${customerServiceId}`
-        //   );
+        setSelectedCustomers([]);
       } catch (error) {
-        console.log(error);
         if (error instanceof Error) toast.error(error.message);
       }
     },
-    [leftList, rightList]
+    [leftList, rightList, selectedCustomers]
   );
-
-  //   console.log(sortedLeftList);
 
   const [open, setOpen] = React.useState<-1 | 0 | 1>(0);
 
@@ -697,7 +818,11 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
           </Button>
         </section>
         <motion.section className="h-full overflow-auto">
-          <CustomerList customers={rightList} />
+          <CustomerList
+            customers={rightList}
+            selectedCustomers={selectedCustomers}
+            setSelectedCustomers={setSelectedCustomers}
+          />
         </motion.section>
       </div>
     </DragDropContext>
