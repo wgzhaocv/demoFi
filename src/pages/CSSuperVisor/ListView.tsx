@@ -76,14 +76,26 @@ const CustomerServiceList = ({
         </Text>
       </div>
       <CustomerServiceRow asTitle cols={cols} setCols={setCols} />
-      {customerGroup.map((group) => (
-        <CustomerServiceGroup
-          key={group.customerService}
-          customerService={group.customerService}
-          customers={group.customers}
-          cols={cols}
-        />
-      ))}
+      <Droppable droppableId={"CustomerServiceList"}>
+        {(provided, snapshot) => (
+          <motion.div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className={clsx("flex flex-col w-full")}
+          >
+            {customerGroup.map((group, index) => (
+              <CustomerServiceGroup
+                key={group.customerService}
+                customerService={group.customerService}
+                customers={group.customers}
+                cols={cols}
+                i={index}
+              />
+            ))}
+            {provided.placeholder}
+          </motion.div>
+        )}
+      </Droppable>
     </motion.div>
   );
 };
@@ -92,6 +104,7 @@ type CustomerServiceGroupProps = {
   customerService: string;
   customers: CustomerInfo[];
   cols: ColsAttr[];
+  i: number;
 };
 type ColsAttr = { name: ItemName; deletable: boolean; link: boolean };
 type CustomeListColsAttr = {
@@ -103,6 +116,7 @@ const CustomerServiceGroup = ({
   customerService,
   customers,
   cols,
+  i,
 }: CustomerServiceGroupProps) => {
   const [open, setOpen] = React.useState(true);
   const ref = React.useRef<HTMLDivElement>(null);
@@ -116,14 +130,16 @@ const CustomerServiceGroup = ({
       }
     }
   }, [open, restCustomers.length]);
+  console.log(i, customerService);
 
   return (
-    <Droppable droppableId={customerService}>
+    <Draggable draggableId={customerService} index={i} isDragDisabled>
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           className={clsx("w-full flex flex-col")}
-          {...provided.droppableProps}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
         >
           <CustomerServiceRow
             cutomer={firstCustomer}
@@ -145,10 +161,9 @@ const CustomerServiceGroup = ({
               />
             ))}
           </div>
-          {provided.placeholder}
         </div>
       )}
-    </Droppable>
+    </Draggable>
   );
 };
 
@@ -620,17 +635,9 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
     const hoveringId = snapshot.draggingOver;
     console.log(hoveringId, snapshot.dropAnimation);
     if (hoveringId?.startsWith("status:")) {
-      return { ...style, transitionDuration: `0.001s` };
+      return { ...style, transitionDuration: `0.001s`, opacity: 0 };
     } else {
-      const { moveTo, curve, duration } = snapshot.dropAnimation!;
-      const translate = `translate(${moveTo.x}px, ${moveTo.y}px)`;
-      console.log(hoveringId, translate);
-
-      return {
-        ...style,
-        transform: `${translate} `,
-        transition: `all ${curve} ${duration + 1}s`,
-      };
+      return style;
     }
   };
 
@@ -755,12 +762,11 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
               `${t("Customer is added to status")}${csStatusMap[newStatus]}`
             );
           }
-        } else {
-          const customerServiceName = droppableId;
-          const customerServiceIndex = leftList.findIndex(
-            (cs) => cs.customerService === customerServiceName
-          );
-          const customerService = leftList[customerServiceIndex];
+        } else if (droppableId === "CustomerServiceList") {
+          const index = result.destination.index;
+          const dstIndex = index - 1;
+
+          const customerService = leftList[dstIndex];
           if (!customerService) return;
 
           const newCustomerService = {
@@ -769,13 +775,13 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
               ...customerService.customers,
               ...customerListMove.map((c) => ({
                 ...c,
-                customerService: customerServiceName,
+                customerService: customerService.customerService,
               })),
             ],
           };
 
           const newLeftList = [...leftList];
-          newLeftList[customerServiceIndex] = newCustomerService;
+          newLeftList[dstIndex] = newCustomerService;
 
           setLeftList(newLeftList);
           setRightList(newRightList);
