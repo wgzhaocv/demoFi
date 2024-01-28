@@ -50,6 +50,11 @@ const resources = {
       "No Changes": "No Changes.",
       "Changed Customers": "Changed Customers",
       Close: "Close",
+      "Select Display Items": "Select Display Items",
+      zipcode: "Zipcode",
+      birthdayYYYY: "Birthday Year",
+      birthdayMM: "Birthday Month",
+      birthdayDD: "Birthday Day",
     },
   },
   jp: {
@@ -98,6 +103,11 @@ const resources = {
       "No Changes": "変更なし",
       "Changed Customers": "変更された顧客",
       Close: "閉じる",
+      "Select Display Items": "表示項目を選択する",
+      zipcode: "郵便番号",
+      birthdayYYYY: "誕生年",
+      birthdayMM: "誕生月",
+      birthdayDD: "誕生日",
     },
   },
 };

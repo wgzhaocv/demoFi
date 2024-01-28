@@ -7,6 +7,8 @@ export interface DispCustomerItems {
   undisplayList: CustomeListColsAttr[];
   hide: (names: CustomerListItemName[]) => void;
   show: (names: CustomerListItemName[]) => void;
+  setDisplayList: (list: CustomeListColsAttr[]) => void;
+  setUndisplayList: (list: CustomeListColsAttr[]) => void;
 }
 
 export const useDispItems = create<DispCustomerItems>((set) => ({
@@ -53,4 +55,6 @@ export const useDispItems = create<DispCustomerItems>((set) => ({
       };
     });
   },
+  setDisplayList: (list) => set(() => ({ displayList: list })),
+  setUndisplayList: (list) => set(() => ({ undisplayList: list })),
 }));

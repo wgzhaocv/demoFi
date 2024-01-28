@@ -11,6 +11,7 @@ import { IconButton, Link, Text, Tooltip } from "@radix-ui/themes";
 import { useCustomerServiceList } from "@/components/providers/CSList";
 import "./CustomerReview.css";
 import clsx from "clsx";
+import { motion } from "framer-motion";
 
 type ReviewHeaderProps = {
   name: string;
@@ -118,7 +119,7 @@ const CustomerServiceHistory = React.memo(
       "処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析";
     return (
       <div className="h-full flex flex-col justify-between ">
-        <div className="h-full w-full flex flex-col border-b border-zinc-400/90">
+        <div className="h-full w-[fit-content] flex flex-col border-b border-zinc-400/90">
           <ReviewHeader
             name={cusutomerServiceSummary?.customerServiceId ?? ""}
             isCs
@@ -251,24 +252,48 @@ export const CustomerReview = React.memo(({}: CustomerReviewProps) => {
       });
     }
   }, [customerInfo, customerServiceHistory]);
+  const [open, setOpen] = React.useState<-1 | 0 | 1>(0);
   return (
     <section
       ref={ref}
       id="customerReview"
-      className="w-full h-[80vh] rounded-lg shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/10 relative flex"
+      className="w-[90vw] h-[80vh] rounded-lg shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/10 relative flex"
     >
-      <div className="flex-grow-0 flex-shrink-0">
+      <motion.div
+        className="flex-grow-0 flex-shrink-0 overflow-hidden"
+        animate={{
+          width: open === -1 ? "100px" : open === 1 ? "85vw" : "auto",
+        }}
+      >
         <CustomerServiceHistory
           cusutomerServiceSummary={customerServiceHistory}
           setCustomerInfo={setCustomerInfo}
           customerInfo={customerInfo}
         />
-      </div>
+      </motion.div>
       <div className="h-full flex flex-col justify-center gap-48 bg-zinc-400/30 sticky top-0 flex-grow-0 flex-shrink-0">
-        <Button variant="ghost" className="mx-auto p-0 h-[fit-content]">
+        <Button
+          variant="ghost"
+          className="mx-auto p-0 h-[fit-content]"
+          onClick={() => {
+            setOpen((pre) => {
+              if (pre === -1) return -1;
+              return (pre - 1) as -1 | 0;
+            });
+          }}
+        >
           <ChevronsLeft className="w-5 h-5 mx-auto text-zinc-900/50" />
         </Button>
-        <Button variant="ghost" className="mx-auto p-0 h-[fit-content]">
+        <Button
+          variant="ghost"
+          className="mx-auto p-0 h-[fit-content]"
+          onClick={() => {
+            setOpen((pre) => {
+              if (pre === 1) return 1;
+              return (pre + 1) as 1 | 0;
+            });
+          }}
+        >
           <ChevronsRight className="w-5 h-5 mx-auto text-zinc-900/50" />
         </Button>
       </div>

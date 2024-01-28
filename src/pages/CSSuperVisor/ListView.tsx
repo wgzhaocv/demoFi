@@ -1009,21 +1009,44 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
     <DragDropContext onDragEnd={handleDragEnd}>
       <div
         className={clsx(
-          "h-[80vh] rounded-lg shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/10 relative",
+          "h-[80vh] w-[90vw] rounded-lg shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/10 relative",
           "flex overflow-auto"
         )}
       >
         <DiffDialog />
-        <motion.section className="h-full overflow-auto flex-shrink-0">
-          <div className="">
+        <motion.section
+          className={clsx("h-full overflow-auto flex-shrink-0")}
+          animate={{
+            width: open === -1 ? "100px" : open === 1 ? "85vw" : "auto",
+          }}
+        >
+          <div className="w-[fit-content]">
             <CustomerServiceList groupedCustomers={leftList} />
           </div>
         </motion.section>
         <section className="h-full flex flex-col justify-center gap-48 bg-zinc-400/30 sticky top-0">
-          <Button variant="ghost" className="mx-auto p-0 h-[fit-content]">
+          <Button
+            variant="ghost"
+            className="mx-auto p-0 h-[fit-content]"
+            onClick={() => {
+              setOpen((pre) => {
+                if (pre === -1) return -1;
+                return (pre - 1) as -1 | 0;
+              });
+            }}
+          >
             <ChevronsLeft className="w-5 h-5 mx-auto text-zinc-900/50" />
           </Button>
-          <Button variant="ghost" className="mx-auto p-0 h-[fit-content]">
+          <Button
+            variant="ghost"
+            className="mx-auto p-0 h-[fit-content]"
+            onClick={() => {
+              setOpen((pre) => {
+                if (pre === 1) return 1;
+                return (pre + 1) as -1 | 0;
+              });
+            }}
+          >
             <ChevronsRight className="w-5 h-5 mx-auto text-zinc-900/50" />
           </Button>
         </section>

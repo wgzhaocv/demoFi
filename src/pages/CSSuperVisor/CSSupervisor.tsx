@@ -6,6 +6,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
 import { animate, motion, useMotionValue } from "framer-motion";
+import { DispItemDialog } from "./DispItemsDialog";
 
 const CSSuperVisor = () => {
   const { t } = useTranslation();
@@ -19,7 +20,8 @@ const CSSuperVisor = () => {
   return (
     <div key={key}>
       <Tabs defaultValue="listMode" className="w-full">
-        <div className="flex justify-end gap-2 fixed right-40 top-5 z-40">
+        <div className="w-full flex justify-end gap-2 fixed right-40 top-5 z-40">
+          <DispItemDialog />
           <TabsList>
             <TabsTrigger value="listMode">{t("listMode")}</TabsTrigger>
             <TabsTrigger value="blockMode">{t("blockMode")}</TabsTrigger>
