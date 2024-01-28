@@ -38,7 +38,7 @@ const generateCustomerSubaccount = (customerID: string): CustomerSubaccount => {
   ];
 };
 
-type CustomerReview = {
+export type CustomerReview = {
   reviwA: string;
   reviwB: string;
   reviwC: string;

@@ -39,6 +39,7 @@ type CustomerServiceHistoryRowProps =
       customerReview: CustomerHistoryReview;
       cols: columns[];
       selected: boolean;
+      setCustomerInfo: (customerInfo: CustomerInfo) => void;
     }
   | {
       asTitle: boolean;
@@ -52,16 +53,23 @@ const CustomerServiceHistoryRow = React.memo(
       return (
         <div className="customer-history-row bg-pink-200 sticky ">
           {props.cols.map((col) => {
-            return <div className="customer-history-cell">{t(col.name)}</div>;
+            return (
+              <div key={col.name} className="customer-history-cell">
+                {t(col.name)}
+              </div>
+            );
           })}
         </div>
       );
     }
+    console.log(props.customerReview.customer.customerID, props.selected);
+
     return (
       <div
+        onClick={() => props.setCustomerInfo(props.customerReview.customer)}
         className={clsx(
-          "customer-history-row",
-          props.selected && "bg-pink-200/60"
+          "customer-history-row hover:bg-pink-300/10",
+          props.selected && "bg-pink-200/60 hover:bg-pink-200/60"
         )}
       >
         {props.cols.map((col) => {
@@ -87,10 +95,15 @@ const CustomerServiceHistoryRow = React.memo(
 type CustomerServiceHistoryProps = {
   cusutomerServiceSummary?: CustomerServiceHistoryInfo;
   customerInfo?: CustomerInfo;
+  setCustomerInfo: (customerInfo: CustomerInfo) => void;
 };
 
 const CustomerServiceHistory = React.memo(
-  ({ cusutomerServiceSummary, customerInfo }: CustomerServiceHistoryProps) => {
+  ({
+    cusutomerServiceSummary,
+    customerInfo,
+    setCustomerInfo,
+  }: CustomerServiceHistoryProps) => {
     const [cols, setCols] = React.useState<columns[]>([
       { name: "customerName" },
       { name: "customerID" },
@@ -99,6 +112,8 @@ const CustomerServiceHistory = React.memo(
       { name: "customersReview" },
     ]);
     const { t } = useTranslation();
+    console.log(customerInfo);
+
     const text =
       "処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析";
     return (
@@ -115,6 +130,7 @@ const CustomerServiceHistory = React.memo(
                 key={customerWithReview.customer.customerID}
                 customerReview={customerWithReview}
                 cols={cols}
+                setCustomerInfo={setCustomerInfo}
                 selected={
                   customerInfo?.customerID ===
                   customerWithReview.customer.customerID
@@ -124,10 +140,18 @@ const CustomerServiceHistory = React.memo(
           </div>
         </div>
 
-        <div className="h-[200px] flex-shrink-0 flex-grow-0 place-content-end">
-          <div className="w-full font-semibold">{t("CS Evaluation")}</div>
+        <div className="h-[200px] flex-shrink-0 flex-grow-0 place-content-end p-1">
+          <div className="w-full font-semibold">
+            {t("CS Evaluation") + t(": ")}
+          </div>
           <pre className="w-full">{text}</pre>
-          <div>{t("conclusion") + t(": ")}</div>
+          <div>
+            {t("conclusion") +
+              t(": ") +
+              ((cusutomerServiceSummary &&
+                cusutomerServiceSummary?.conculusion) ??
+                "")}
+          </div>
         </div>
       </div>
     );
@@ -147,9 +171,54 @@ const CustomerReviewDetail = React.memo(
         <div className="w-full flex-grow border-b border-zinc-400/90">
           <pre className="h-full">{text}</pre>
         </div>
-        <div className="w-full h-[200px] flex-shrink-0 flex-grow-0 overflow-auto">
+        <div className="w-full h-[200px] flex-shrink-0 flex-grow-0 p-1">
           <div className="font-semibold">{t("Csutomer Evaluation") + ":"}</div>
           <div>{t("Data Analysis Results")}</div>
+          {customerInfo && customerInfo.review.reviwA && (
+            <div className="flex flex-nowrap">
+              <pre className="flex items-center justify-start flex-grow-0 flex-shrink-0">
+                {t("reviwA") + t(": ")}
+              </pre>
+              <pre>{customerInfo.review.reviwA}</pre>
+            </div>
+          )}
+          {customerInfo && customerInfo.review.reviwB && (
+            <div className="flex flex-nowrap">
+              <div className="flex items-center justify-start flex-grow-0 flex-shrink-0">
+                {t("reviwB") + t(": ")}
+              </div>
+              <pre>{customerInfo.review.reviwB}</pre>
+            </div>
+          )}
+          {customerInfo && customerInfo.review.reviwC && (
+            <div className="flex flex-nowrap">
+              <pre className="flex items-center justify-start flex-grow-0 flex-shrink-0">
+                {t("reviwC") + t(": ")}
+              </pre>
+              <pre>{customerInfo.review.reviwC}</pre>
+            </div>
+          )}
+          {customerInfo && customerInfo.review.reviwD && (
+            <div className="flex flex-nowrap">
+              <pre className="flex items-center justify-start flex-grow-0 flex-shrink-0">
+                {t("reviwD") + t(": ")}
+              </pre>
+              <pre>{customerInfo.review.reviwD}</pre>
+            </div>
+          )}
+          {customerInfo && customerInfo.review.reviwE && (
+            <div className="flex flex-nowrap">
+              <pre className="flex items-center justify-start flex-grow-0 flex-shrink-0">
+                {t("reviwE") + t(": ")}
+              </pre>
+              <pre>{customerInfo.review.reviwE}</pre>
+            </div>
+          )}
+          <div>
+            {t("conclusion") +
+              t(": ") +
+              ((customerInfo && customerInfo?.review.conculusion) ?? "")}
+          </div>
         </div>
       </div>
     );
@@ -159,7 +228,8 @@ const CustomerReviewDetail = React.memo(
 type CustomerReviewProps = {};
 
 export const CustomerReview = React.memo(({}: CustomerReviewProps) => {
-  const { customerInfo, customerServiceHistory } = useCustomerServiceList();
+  const { customerInfo, customerServiceHistory, setCustomerInfo } =
+    useCustomerServiceList();
   const ref = React.useRef<HTMLDivElement>(null);
   const lastCustomerAndServiceHistory = React.useRef<{
     customerInfo?: CustomerInfo;
@@ -190,6 +260,8 @@ export const CustomerReview = React.memo(({}: CustomerReviewProps) => {
       <div className="flex-grow-0 flex-shrink-0">
         <CustomerServiceHistory
           cusutomerServiceSummary={customerServiceHistory}
+          setCustomerInfo={setCustomerInfo}
+          customerInfo={customerInfo}
         />
       </div>
       <div className="h-full flex flex-col justify-center gap-48 bg-zinc-400/30 sticky top-0 flex-grow-0 flex-shrink-0">

@@ -58,6 +58,9 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { useCustomerServiceList } from "@/components/providers/CSList";
+import { DiffDialog } from "./diffDialog";
+import { useDiffCustomerServiceList } from "@/components/providers/allCustomers";
+import { useDispItems } from "@/components/providers/DispItems";
 
 type CustomerServiceListProps = {
   groupedCustomers: CustomerService[];
@@ -120,7 +123,7 @@ type CustomerServiceGroupProps = {
   i: number;
 };
 type ColsAttr = { name: ItemName; deletable: boolean; link: boolean };
-type CustomeListColsAttr = {
+export type CustomeListColsAttr = {
   name: CustomerListItemName;
   deletable: boolean;
   link: boolean;
@@ -143,7 +146,6 @@ const CustomerServiceGroup = ({
       }
     }
   }, [open, restCustomers.length]);
-  console.log(i, customerService);
 
   return (
     <Draggable draggableId={customerService} index={i} isDragDisabled>
@@ -353,13 +355,7 @@ const CustomerList = React.memo(
       allStatusId[0]
     );
 
-    const [cols, setCols] = React.useState<CustomeListColsAttr[]>([
-      { name: "customerName", deletable: false, link: true },
-      { name: "customerID", deletable: true, link: true },
-      { name: "mailAddress", deletable: false, link: false },
-      { name: "telephone", deletable: false, link: false },
-      { name: "address", deletable: false, link: false },
-    ]);
+    const cols = useDispItems((state) => state.displayList);
 
     const handleCustomerClick = React.useCallback((customer: CustomerInfo) => {
       return (e: React.MouseEvent) => {
@@ -390,10 +386,9 @@ const CustomerList = React.memo(
         <ul className="cs-row sticky top-[45px] bg-white z-30">
           <AnimatePresence>
             {allStatusTabs.map((status) => (
-              <Droppable droppableId={"status:" + status}>
+              <Droppable droppableId={"status:" + status} key={status}>
                 {(provided, snapshot) => (
                   <motion.li
-                    key={status}
                     style={{ width: 150 }}
                     exit={{ width: 0 }}
                     className={clsx(
@@ -441,7 +436,7 @@ const CustomerList = React.memo(
             ))}
           </AnimatePresence>
         </ul>
-        <CustomerRow asTitle cols={cols} setCols={setCols} />
+        <CustomerRow asTitle cols={cols} />
         <Droppable droppableId={"CustomerList"}>
           {(provided, snapshot) => (
             <motion.div
@@ -534,7 +529,6 @@ type CustomerRowprops =
   | {
       asTitle: boolean;
       cols: CustomeListColsAttr[];
-      setCols: React.Dispatch<React.SetStateAction<CustomeListColsAttr[]>>;
     }
   | {
       customer: CustomerInfo;
@@ -547,6 +541,7 @@ type CustomerRowprops =
     };
 const CustomerRow = React.memo((props: CustomerRowprops) => {
   const { customerListItemWidth } = useCustomerListItemWStore();
+  const hide = useDispItems((state) => state.hide);
   const { t } = useTranslation();
   const [open, setOpen] = React.useState(false);
 
@@ -575,9 +570,7 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
                         variant="ghost"
                         radius="full"
                         size={"1"}
-                        onClick={() =>
-                          props.setCols((cols) => cols.filter((c) => c !== col))
-                        }
+                        onClick={() => hide([col.name])}
                       >
                         <XCircle className="w-4 h-4" />
                       </IconButton>
@@ -779,6 +772,9 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
 
 type CSListViewProps = {};
 export const CSListView = React.memo(({}: CSListViewProps) => {
+  const { setCustomerListFrom, setCustomerListTo } =
+    useDiffCustomerServiceList();
+
   const [leftList, setLeftList] = React.useState<CustomerService[]>([]);
 
   const [rightList, setRightList] = React.useState<
@@ -796,6 +792,25 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
     (async () => {
       const testData = await generateCSs();
       setLeftList(testData.customerServices);
+
+      const customerFrom: CustomerInfo[] = [];
+
+      testData.customerServices.forEach((cs) => {
+        cs.customers.forEach((c) => {
+          customerFrom.push(c);
+        });
+
+        cs.customerServiceHistoryInfo.customers.forEach((c) => {
+          customerFrom.push(c.customer);
+        });
+      });
+
+      testData.customers.forEach((c) => {
+        customerFrom.push(c);
+      });
+
+      setCustomerListFrom(customerFrom);
+
       const customersLists = testData.customers.reduce(
         (pre, cur) => {
           pre[cur.status as CsStatusId].push(cur);
@@ -813,6 +828,26 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
       setRightList(customersLists);
     })();
   }, []);
+
+  useEffect(() => {
+    const customerTo: CustomerInfo[] = [];
+    Object.entries(rightList).forEach(([_, customers]) => {
+      customers.forEach((c) => {
+        customerTo.push(c);
+      });
+    });
+
+    leftList.forEach((cs) => {
+      cs.customers.forEach((c) => {
+        customerTo.push(c);
+      });
+      cs.customerServiceHistoryInfo.customers.forEach((c) => {
+        customerTo.push(c.customer);
+      });
+    });
+
+    setCustomerListTo(customerTo);
+  }, [leftList, rightList]);
 
   const [selectedCustomers, setSelectedCustomers] = React.useState<
     CustomerInfo[]
@@ -852,11 +887,15 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
 
         if (droppableId.startsWith("status:")) {
           const newStatus = droppableId.split(":")[1] as CsStatusId;
+          const newCustomerListMove = customerListMove.map((c) => ({
+            ...c,
+            status: newStatus,
+          }));
 
           if (newStatus !== status) {
             newRightList = {
               ...newRightList,
-              [newStatus]: [...newRightList[newStatus], ...customerListMove],
+              [newStatus]: [...newRightList[newStatus], ...newCustomerListMove],
             };
             setRightList(newRightList);
             toast.success(
@@ -901,7 +940,6 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
     [leftList, rightList, selectedCustomers]
   );
 
-  const [open, setOpen] = React.useState<-1 | 0 | 1>(0);
   const location = useLocation();
   const { setCustomerInfo, setCustomerServiceHistory } =
     useCustomerServiceList();
@@ -965,6 +1003,8 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
     }
   }, [location, customerMap, customerServiceMap]);
 
+  const [open, setOpen] = React.useState<-1 | 0 | 1>(0);
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div
@@ -973,6 +1013,7 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
           "flex overflow-auto"
         )}
       >
+        <DiffDialog />
         <motion.section className="h-full overflow-auto flex-shrink-0">
           <div className="">
             <CustomerServiceList groupedCustomers={leftList} />

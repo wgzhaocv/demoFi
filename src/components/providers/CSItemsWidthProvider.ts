@@ -37,7 +37,12 @@ export type CustomerListItemName =
   | "customerID"
   | "mailAddress"
   | "telephone"
-  | "address";
+  | "address"
+  | "mynumber"
+  | "zipcode"
+  | "birthdayYYYY"
+  | "birthdayMM"
+  | "birthdayDD";
 
 interface CustomerListItemsWidthState {
   customerListItemWidth: {
@@ -46,6 +51,11 @@ interface CustomerListItemsWidthState {
     mailAddress: number;
     telephone: number;
     address: number;
+    mynumber: number;
+    zipcode: number;
+    birthdayYYYY: number;
+    birthdayMM: number;
+    birthdayDD: number;
   };
   changeW: (by: number, item: CustomerListItemName) => void;
 }
@@ -57,6 +67,11 @@ export const useCustomerListItemWStore = create<CustomerListItemsWidthState>(
       mailAddress: 150,
       telephone: 150,
       address: 150,
+      mynumber: 150,
+      zipcode: 150,
+      birthdayYYYY: 150,
+      birthdayMM: 150,
+      birthdayDD: 150,
     },
     changeW: (by, item) => set(() => ({ [item]: by })),
   })
