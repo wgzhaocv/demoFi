@@ -122,12 +122,14 @@ const generateCustomer = (customerService = ""): CustomerInfo => {
 };
 const satisfication = ["A", "B", "C"] as const;
 
-type CustomerServiceHistoryInfo = {
+export type CustomerHistoryReview = {
+  customer: CustomerInfo;
+  customersReview: (typeof satisfication)[number];
+};
+
+export type CustomerServiceHistoryInfo = {
   customerServiceId: string;
-  customers: {
-    customer: CustomerInfo;
-    customersReview: (typeof satisfication)[number];
-  }[];
+  customers: CustomerHistoryReview[];
   customerServiceReview: string;
   conculusion: string;
 };

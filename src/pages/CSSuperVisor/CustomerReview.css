@@ -1,0 +1,11 @@
+@tailwind components;
+
+@layer components {
+  .customer-history-row {
+    @apply w-full h-[45px] flex items-center bg-white border-b-[1px] border-slate-200/90 shrink-0 grow-0;
+  }
+
+  .customer-history-cell {
+    @apply w-40 flex p-2 items-center shrink-0 grow-0;
+  }
+}

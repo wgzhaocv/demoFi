@@ -45,6 +45,19 @@ import {
   CustomerSubaccount,
   generateCSs,
 } from "@/TestData/fakeData";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
+
+import {
+  Link as LinkRrd,
+  useLocation,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
+import { useCustomerServiceList } from "@/components/providers/CSList";
 
 type CustomerServiceListProps = {
   groupedCustomers: CustomerService[];
@@ -264,7 +277,13 @@ const CustomerServiceRow = React.memo((props: CustomerServiceRowProps) => {
             >
               {i === 0 ? (
                 <>
-                  <Text className="break-all">{props.csName}</Text>
+                  <Link asChild>
+                    <LinkRrd
+                      to={`?customerService=${props.csName}#customerReview`}
+                    >
+                      <Text className="break-all">{props.csName}</Text>
+                    </LinkRrd>
+                  </Link>
                   {props.csName && (
                     <motion.div
                       className="ml-2 flex items-center absolute right-1 top-[50%] translateTocenter"
@@ -297,10 +316,16 @@ const CustomerServiceRow = React.memo((props: CustomerServiceRowProps) => {
                     {t(csStatusMap[props.cutomer[col.name] as CsStatusId])}
                   </Text>
                 </Tooltip>
+              ) : col.link ? (
+                <Link asChild>
+                  <LinkRrd
+                    to={`?customer=${props.cutomer.customerID}#customerReview`}
+                  >
+                    <Text>{props.cutomer[col.name]}</Text>
+                  </LinkRrd>
+                </Link>
               ) : (
-                <OptionLink isLink={col.link}>
-                  <Text>{props.cutomer[col.name]}</Text>
-                </OptionLink>
+                <Text>{props.cutomer[col.name]}</Text>
               )}
             </motion.div>
           </React.Fragment>
@@ -365,22 +390,24 @@ const CustomerList = React.memo(
         <ul className="cs-row sticky top-[45px] bg-white z-30">
           <AnimatePresence>
             {allStatusTabs.map((status) => (
-              <motion.li
-                key={status}
-                style={{ width: 150 }}
-                exit={{ width: 0 }}
-                className="cs-cell overflow-visible"
-              >
-                <Droppable droppableId={"status:" + status}>
-                  {(provided, snapshot) => (
+              <Droppable droppableId={"status:" + status}>
+                {(provided, snapshot) => (
+                  <motion.li
+                    key={status}
+                    style={{ width: 150 }}
+                    exit={{ width: 0 }}
+                    className={clsx(
+                      "cs-cell overflow-visible",
+                      snapshot.isDraggingOver && "bg-pink-300/10"
+                    )}
+                    ref={provided.innerRef}
+                    onClick={() => setSelectedStatus(status)}
+                    {...provided.droppableProps}
+                  >
                     <div
-                      ref={provided.innerRef}
-                      onClick={() => setSelectedStatus(status)}
                       className={clsx(
-                        "w-full h-full rounded-lg relative text-wrap text-center text-zinc-800 flex items-center leading-4 px-2 hover:bg-pink-300/10",
-                        snapshot.isDraggingOver && "bg-pink-300/10"
+                        "w-full h-full rounded-lg relative text-wrap text-center text-zinc-800 flex items-center leading-4 px-2 hover:bg-pink-300/10"
                       )}
-                      {...provided.droppableProps}
                     >
                       {selectedStatus === status && (
                         <motion.div
@@ -408,9 +435,9 @@ const CustomerList = React.memo(
                       </div>
                       <span className="hidden">{provided.placeholder}</span>
                     </div>
-                  )}
-                </Droppable>
-              </motion.li>
+                  </motion.li>
+                )}
+              </Droppable>
             ))}
           </AnimatePresence>
         </ul>
@@ -580,8 +607,23 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
     });
   }, []);
 
-  const row = React.useMemo(
-    () => (
+  const row = React.useMemo(() => {
+    const hasReview =
+      props.customer.review.reviwA ||
+      props.customer.review.reviwB ||
+      props.customer.review.reviwC ||
+      props.customer.review.reviwD ||
+      props.customer.review.reviwE;
+    const reviews = [
+      props.customer.review.reviwA,
+      props.customer.review.reviwB,
+      props.customer.review.reviwC,
+      props.customer.review.reviwD,
+      props.customer.review.reviwE,
+    ];
+    const kana = ["あ", "い", "う", "え", "お"];
+
+    return (
       <motion.div
         className={clsx("w-full cs-row", props.selected && "bg-pink-300/10")}
         onClick={props.handleCustomerClick(props.customer)}
@@ -606,38 +648,97 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
                     </IconButton>
                   </div>
                 )}
-                <OptionLink isLink={col.link}>
-                  <Text>{props.customer[col.name]}</Text>
-                </OptionLink>
+                {col.name === "customerName" ? (
+                  hasReview ? (
+                    <div className="w-full h-full flex flex-col items-start justify-between">
+                      <Link asChild>
+                        <LinkRrd
+                          to={`?customer=${props.customer.customerID}#customerReview`}
+                        >
+                          <Text>{props.customer[col.name]}</Text>
+                        </LinkRrd>
+                      </Link>
+                      <div className="w-full flex justify-around flex-nowrap">
+                        {reviews.map((review, i) => (
+                          <HoverCard key={i} openDelay={100}>
+                            <HoverCardTrigger>
+                              {review ? (
+                                <LinkRrd
+                                  to={`?customer=${props.customer.customerID}#customerReview`}
+                                >
+                                  <Link asChild>
+                                    <span
+                                      key={i}
+                                      className={clsx(
+                                        "text-xs text-zinc-600 font-semibold"
+                                      )}
+                                    >
+                                      {kana[i]}
+                                    </span>
+                                  </Link>
+                                </LinkRrd>
+                              ) : (
+                                <span
+                                  key={i}
+                                  className={clsx(
+                                    "text-xs text-zinc-600 font-semibold"
+                                  )}
+                                >
+                                  {kana[i]}
+                                </span>
+                              )}
+                            </HoverCardTrigger>
+                            {review && (
+                              <HoverCardContent>{review}</HoverCardContent>
+                            )}
+                          </HoverCard>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <Link asChild>
+                      <LinkRrd
+                        to={`?customer=${props.customer.customerID}#customerReview`}
+                      >
+                        <Text>{props.customer[col.name]}</Text>
+                      </LinkRrd>
+                    </Link>
+                  )
+                ) : (
+                  <OptionLink isLink={col.link}>
+                    <Text>{props.customer[col.name]}</Text>
+                  </OptionLink>
+                )}
               </motion.div>
             </React.Fragment>
           ))}
         </AnimatePresence>
       </motion.div>
-    ),
-    [
-      props.cols,
-      props.customer,
-      customerListItemWidth,
-      handleOpenDetail,
-      props.selected,
-      props.handleCustomerClick,
-    ]
-  );
+    );
+  }, [
+    props.cols,
+    props.customer,
+    customerListItemWidth,
+    handleOpenDetail,
+    props.selected,
+    props.handleCustomerClick,
+  ]);
 
   const getStyle = (
     snapshot: DraggableStateSnapshot,
     style?: DraggingStyle | NotDraggingStyle
   ) => {
+    const isDragging = snapshot.isDragging;
+    const cursor = isDragging ? "grabbing" : "default";
     if (!snapshot.isDropAnimating) {
-      return style;
+      return { ...style, cursor };
     }
     const hoveringId = snapshot.draggingOver;
     console.log(hoveringId, snapshot.dropAnimation);
     if (hoveringId?.startsWith("status:")) {
-      return { ...style, transitionDuration: `0.001s`, opacity: 0 };
+      return { ...style, transitionDuration: `0.001s`, opacity: 0, cursor };
     } else {
-      return style;
+      return { ...style, cursor };
     }
   };
 
@@ -759,7 +860,7 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
             };
             setRightList(newRightList);
             toast.success(
-              `${t("Customer is added to status")}${csStatusMap[newStatus]}`
+              `${t("Customer is added to status")}${t(csStatusMap[newStatus])}`
             );
           }
         } else if (droppableId === "CustomerServiceList") {
@@ -801,6 +902,68 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
   );
 
   const [open, setOpen] = React.useState<-1 | 0 | 1>(0);
+  const location = useLocation();
+  const { setCustomerInfo, setCustomerServiceHistory } =
+    useCustomerServiceList();
+  const customerMap = React.useMemo(() => {
+    const customerLocalMap: Record<string, CustomerInfo> = {};
+    leftList.forEach((cs) => {
+      cs.customers.forEach((c) => {
+        customerLocalMap[c.customerID] = c;
+      });
+    });
+
+    Object.entries(rightList).forEach(([_, customers]) => {
+      customers.forEach((c) => {
+        customerLocalMap[c.customerID] = c;
+      });
+    });
+
+    return customerLocalMap;
+  }, [leftList, rightList]);
+
+  const customerServiceMap = React.useMemo(() => {
+    const customerServiceMap: Record<string, CustomerService> = {};
+    leftList.forEach((cs) => {
+      customerServiceMap[cs.customerService] = cs;
+    });
+    return customerServiceMap;
+  }, [leftList]);
+
+  React.useEffect(() => {
+    const { hash, search } = location;
+    const searchParams: Record<string, string> = {};
+    if (hash === "#customerReview") {
+      search
+        .slice(1)
+        .split("&")
+        .forEach((s) => {
+          const [key, value] = s.split("=");
+          searchParams[key] = value;
+        });
+      if (searchParams.customer) {
+        const customer = customerMap[searchParams.customer];
+        if (customer) {
+          const customerService = customerServiceMap[customer.customerService];
+          if (customerService) {
+            setCustomerServiceHistory(
+              customerService.customerServiceHistoryInfo
+            );
+          }
+          setCustomerInfo(customer);
+        }
+      } else if (searchParams.customerService) {
+        const customerService =
+          customerServiceMap[searchParams.customerService];
+        const customer =
+          customerService?.customerServiceHistoryInfo.customers[0].customer;
+        if (customerService) {
+          setCustomerServiceHistory(customerService.customerServiceHistoryInfo);
+        }
+        if (customer) setCustomerInfo(customer);
+      }
+    }
+  }, [location, customerMap, customerServiceMap]);
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>

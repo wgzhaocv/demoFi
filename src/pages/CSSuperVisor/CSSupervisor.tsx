@@ -17,9 +17,9 @@ const CSSuperVisor = () => {
     animate(rotate, "-360deg", { duration: 1 }).then(() => rotate.set("0"));
   };
   return (
-    <div key={key} className="">
+    <div key={key}>
       <Tabs defaultValue="listMode" className="w-full">
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 fixed right-40 top-5 z-40">
           <TabsList>
             <TabsTrigger value="listMode">{t("listMode")}</TabsTrigger>
             <TabsTrigger value="blockMode">{t("blockMode")}</TabsTrigger>

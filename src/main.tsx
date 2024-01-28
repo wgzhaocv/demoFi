@@ -7,6 +7,14 @@ import "@/lib/i18n.ts";
 import { Toaster } from "@/components/ui/sonner";
 
 import { Theme } from "@radix-ui/themes";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+  },
+]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <>
@@ -17,7 +25,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       radius="large"
       scaling="95%"
     >
-      <App />
+      <RouterProvider router={router} />
       <Toaster />
     </Theme>
   </>
