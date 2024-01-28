@@ -11,7 +11,8 @@ import { IconButton, Link, Text, Tooltip } from "@radix-ui/themes";
 import { useCustomerServiceList } from "@/components/providers/CSList";
 import "./CustomerReview.css";
 import clsx from "clsx";
-import { motion } from "framer-motion";
+import { motion, useInView } from "framer-motion";
+import { useNavigate, useLocation } from "react-router";
 
 type ReviewHeaderProps = {
   name: string;
@@ -253,6 +254,16 @@ export const CustomerReview = React.memo(({}: CustomerReviewProps) => {
     }
   }, [customerInfo, customerServiceHistory]);
   const [open, setOpen] = React.useState<-1 | 0 | 1>(0);
+  const viewref = React.useRef(null);
+  const isInView = useInView(viewref);
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  useEffect(() => {
+    if (!isInView) {
+      navigate(location.pathname);
+    }
+  }, [isInView]);
   return (
     <section
       ref={ref}
@@ -260,6 +271,7 @@ export const CustomerReview = React.memo(({}: CustomerReviewProps) => {
       className="w-[90vw] h-[80vh] rounded-lg shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/10 relative flex"
     >
       <motion.div
+        ref={viewref}
         className="flex-grow-0 flex-shrink-0 overflow-hidden"
         animate={{
           width: open === -1 ? "100px" : open === 1 ? "85vw" : "auto",
