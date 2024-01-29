@@ -22,11 +22,13 @@ export const Collapse = React.memo(
         const height = ref.current.scrollHeight;
         maxLen.set(open ? height : 0);
       }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open]);
 
     useEffect(() => {
       if (!ref.current || length === undefined) return;
       maxLen.set(length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [length]);
 
     return (

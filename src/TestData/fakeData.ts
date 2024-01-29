@@ -1,5 +1,5 @@
 import { CsStatusId } from "@/lib/status";
-import { base, en, ja, Faker } from "@faker-js/faker";
+import { base, en, Faker } from "@faker-js/faker";
 import localforage from "localforage";
 
 export const faker = new Faker({

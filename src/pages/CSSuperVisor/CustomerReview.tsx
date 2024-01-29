@@ -106,7 +106,6 @@ const CustomerServiceHistory = React.memo(
     customerInfo,
     setCustomerInfo,
   }: CustomerServiceHistoryProps) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [cols] = React.useState<columns[]>([
       { name: "customerName" },
       { name: "customerID" },
