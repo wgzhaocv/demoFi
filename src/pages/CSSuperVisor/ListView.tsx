@@ -11,10 +11,7 @@ import {
 import "./tablecss.css";
 import { useTranslation } from "react-i18next";
 import { CsStatusId, allStatusId, csStatusMap } from "@/lib/status";
-import {
-  AnimatePresence,
-  motion,
-} from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   CustomerListItemName,
   ItemName,
@@ -45,14 +42,29 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 
-import {
-  Link as LinkRrd,
-  useLocation,
-} from "react-router-dom";
+import { Link as LinkRrd, useLocation } from "react-router-dom";
 import { useCustomerServiceList } from "@/components/providers/CSList";
 import { DiffDialog } from "./diffDialog";
 import { useDiffCustomerServiceList } from "@/components/providers/allCustomers";
 import { useDispItems } from "@/components/providers/DispItems";
+
+const calculateTargetIndex = (
+  mousePosition: { x: number; y: number },
+  droppableElements: HTMLElement[]
+) => {
+  for (let i = 0; i < droppableElements.length; i++) {
+    const rect = droppableElements[i].getBoundingClientRect();
+    if (
+      mousePosition.x >= rect.left &&
+      mousePosition.x <= rect.right &&
+      mousePosition.y >= rect.top &&
+      mousePosition.y <= rect.bottom
+    ) {
+      return i;
+    }
+  }
+  return -1;
+};
 
 type CustomerServiceListProps = {
   groupedCustomers: CustomerService[];
@@ -334,6 +346,9 @@ type CustomerListProps = {
   customers: Record<CsStatusId, CustomerInfo[]>;
   selectedCustomers: CustomerInfo[];
   setSelectedCustomers: React.Dispatch<React.SetStateAction<CustomerInfo[]>>;
+  droppableListRef: React.RefObject<HTMLUListElement>;
+  allStatusTabs:CsStatusId[];
+  setAllStatusTabs:React.Dispatch<React.SetStateAction<CsStatusId[]>>;
 };
 
 const CustomerList = React.memo(
@@ -341,9 +356,11 @@ const CustomerList = React.memo(
     customers,
     selectedCustomers,
     setSelectedCustomers,
+    droppableListRef,
+    allStatusTabs,
+    setAllStatusTabs
   }: CustomerListProps) => {
-    const [allStatusTabs, setAllStatusTabs] =
-      React.useState<CsStatusId[]>(allStatusId);
+    
     const [selectedStatus, setSelectedStatus] = React.useState<CsStatusId>(
       allStatusId[0]
     );
@@ -365,10 +382,11 @@ const CustomerList = React.memo(
           });
         }
       };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const { t } = useTranslation();
+
     return (
       <div className="w-[fit-content]">
         <div className="cs-row w-full justify-center sticky top-0 bg-white text-lg z-30">
@@ -377,18 +395,18 @@ const CustomerList = React.memo(
           </Text>
         </div>
 
-        <ul className="cs-row sticky top-[45px] bg-white z-30">
+        <ul
+          ref={droppableListRef}
+          className="cs-row sticky top-[45px] bg-white z-30"
+        >
           <AnimatePresence>
             {allStatusTabs.map((status) => (
               <Droppable droppableId={"status:" + status} key={status}>
-                {(provided, snapshot) => (
+                {(provided) => (
                   <motion.li
                     style={{ width: 150 }}
                     exit={{ width: 0 }}
-                    className={clsx(
-                      "cs-cell overflow-visible",
-                      snapshot.isDraggingOver && "bg-pink-300/10"
-                    )}
+                    className={clsx("cs-cell overflow-visible")}
                     ref={provided.innerRef}
                     onClick={() => setSelectedStatus(status)}
                     {...provided.droppableProps}
@@ -691,17 +709,16 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
                       </LinkRrd>
                     </Link>
                   )
+                ) : col.link ? (
+                  <Link asChild>
+                    <LinkRrd
+                      to={`?customer=${props.customer.customerID}#customerReview`}
+                    >
+                      <Text>{props.customer[col.name]}</Text>
+                    </LinkRrd>
+                  </Link>
                 ) : (
-                  col.link?(
-                    <Link asChild>
-                      <LinkRrd
-                        to={`?customer=${props.customer.customerID}#customerReview`}
-                      >
-                        <Text>{props.customer[col.name]}</Text>
-                      </LinkRrd>
-                    </Link>
-                  ):(<Text>{props.customer[col.name]}</Text>)
-                  
+                  <Text>{props.customer[col.name]}</Text>
                 )}
               </motion.div>
             </React.Fragment>
@@ -709,7 +726,7 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
         </AnimatePresence>
       </motion.div>
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     props.cols,
     props.customer,
@@ -772,7 +789,6 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
   );
 });
 
-
 export const CSListView = React.memo(() => {
   const { setCustomerListFrom, setCustomerListTo } =
     useDiffCustomerServiceList();
@@ -829,7 +845,7 @@ export const CSListView = React.memo(() => {
       );
       setRightList(customersLists);
     })();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -851,7 +867,7 @@ export const CSListView = React.memo(() => {
     });
 
     setCustomerListTo(customerTo);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leftList, rightList]);
 
   const [selectedCustomers, setSelectedCustomers] = React.useState<
@@ -860,10 +876,21 @@ export const CSListView = React.memo(() => {
 
   const { t } = useTranslation();
 
+  const droppableListRef = React.useRef<HTMLUListElement>(null);
+
+  const mousePositonRef = React.useRef({ x: 0, y: 0 });
+  const [allStatusTabs, setAllStatusTabs] =
+  React.useState<CsStatusId[]>(allStatusId);
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mousePositonRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
   const handleDragEnd = React.useCallback(
     (result: DropResult) => {
-      console.log(result);
-
       try {
         const droppableId = result.destination?.droppableId as string;
 
@@ -890,20 +917,27 @@ export const CSListView = React.memo(() => {
           [status]: customerList.filter((c) => !customerListMove.includes(c)),
         };
 
-        if (droppableId.startsWith("status:")) {
-          const newStatus = droppableId.split(":")[1] as CsStatusId;
+        const statusIndex = calculateTargetIndex(
+          mousePositonRef.current,
+          Array.from(
+            droppableListRef.current?.children as HTMLCollectionOf<HTMLElement>
+          )
+        );
+
+        if (statusIndex !== -1) {
+          const newStatus = allStatusTabs[statusIndex];
           const newCustomerListMove = customerListMove.map((c) => ({
             ...c,
             status: newStatus,
           }));
-          console.log(">>>",newStatus,customerListMove,newCustomerListMove);
+          console.log(">>>", newStatus, customerListMove, newCustomerListMove);
 
           if (newStatus !== status) {
             newRightList = {
               ...newRightList,
               [newStatus]: [...newRightList[newStatus], ...newCustomerListMove],
             };
-            
+
             setRightList(newRightList);
             toast.success(
               `${t("Customer is added to status")}${t(csStatusMap[newStatus])}`
@@ -1010,7 +1044,7 @@ export const CSListView = React.memo(() => {
         if (customer) setCustomerInfo(customer);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, customerMap, customerServiceMap]);
 
   const [open, setOpen] = React.useState<-1 | 0 | 1>(0);
@@ -1065,6 +1099,9 @@ export const CSListView = React.memo(() => {
             customers={rightList}
             selectedCustomers={selectedCustomers}
             setSelectedCustomers={setSelectedCustomers}
+            droppableListRef={droppableListRef}
+            allStatusTabs={allStatusTabs}
+            setAllStatusTabs={setAllStatusTabs}
           />
         </motion.section>
       </div>
