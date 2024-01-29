@@ -187,7 +187,7 @@ export const DispItemDialog = () => {
                             "p-1 my-1 text-lg cursor-default text-zinc-800",
                             selectedItems.flag === 1 &&
                               selectedItems.list.includes(item) &&
-                              "bg-pink-300/30",
+                              "bg-indigo-300/30",
                             snapshot.isDragging && "opacity-50"
                           )}
                           onClick={(e) => clickLeft(e, item)}
@@ -248,7 +248,7 @@ export const DispItemDialog = () => {
                             "p-1 my-1 text-lg cursor-default text-zinc-800",
                             selectedItems.flag === 0 &&
                               selectedItems.list.includes(item) &&
-                              "bg-pink-300/30",
+                              "bg-indigo-300/30",
                             snapshot.isDragging && "opacity-50"
                           )}
                           onClick={(e) => clickRight(e, item)}

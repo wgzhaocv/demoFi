@@ -19,7 +19,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <>
     <Theme
       appearance="dark"
-      accentColor="crimson"
+      accentColor="indigo"
       grayColor="sand"
       radius="large"
       scaling="95%"

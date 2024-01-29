@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { CsStatusId, csStatusMap } from "@/lib/status";
-import React from "react";
+import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
@@ -62,6 +62,9 @@ export const DiffDialog = () => {
   const [customerDiff, setCustomerDiff] = React.useState<CustomerDiff[]>([]);
   const contentRef = React.useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    console.log(customerListFrom, customerListTo);
+  }, [customerListFrom, customerListTo]);
   const customerFromMap = customerListFrom.reduce((acc, cur) => {
     acc[cur.customerID] = cur;
     return acc;
@@ -88,7 +91,7 @@ export const DiffDialog = () => {
     setCustomerDiff(
       computeDiff().sort((a, b) => a.customerID.localeCompare(b.customerID))
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openDiff]);
 
   const handleConfirmDiff = () => {
@@ -118,7 +121,7 @@ export const DiffDialog = () => {
         <DialogHeader>
           <DialogTitle>{t("Confirm Customer Changes")}</DialogTitle>
           <div>
-          {customerDiff.length === 0 && (
+            {customerDiff.length === 0 && (
               <div className="my-2">{t("No Changes")}</div>
             )}
             {customerDiff.length > 0 && (
@@ -181,16 +184,32 @@ export const DiffDialog = () => {
                               </div>
                               <div className="text-zinc-700 h-auto  border-r border-zinc-800 w-52 flex-grow-0 flex-shrink-0 flex items-center">
                                 <span className="bg-pink-300/80 text-pink-950/90">
-                                  {key==='status'?(
-                                    <>{t(csStatusMap[customer.diff[key][0] as CsStatusId])}</>
-                                  ):(<>{customer.diff[key][0]}</>)}
+                                  {key === "status" ? (
+                                    <>
+                                      {t(
+                                        csStatusMap[
+                                          customer.diff[key][0] as CsStatusId
+                                        ]
+                                      )}
+                                    </>
+                                  ) : (
+                                    <>{customer.diff[key][0]}</>
+                                  )}
                                 </span>
                               </div>
                               <div className="text-zinc-700  h-auto  border-r border-zinc-800 w-52 flex-grow-0 flex-shrink-0 flex items-center">
                                 <span className="bg-green-200 text-green-900">
-                                {key==='status'?(
-                                    <>{t(csStatusMap[customer.diff[key][1] as CsStatusId])}</>
-                                  ):(<>{customer.diff[key][1]}</>)}
+                                  {key === "status" ? (
+                                    <>
+                                      {t(
+                                        csStatusMap[
+                                          customer.diff[key][1] as CsStatusId
+                                        ]
+                                      )}
+                                    </>
+                                  ) : (
+                                    <>{customer.diff[key][1]}</>
+                                  )}
                                 </span>
                               </div>
                             </div>

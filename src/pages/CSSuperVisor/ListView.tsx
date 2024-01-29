@@ -44,9 +44,14 @@ import {
 
 import { Link as LinkRrd, useLocation } from "react-router-dom";
 import { useCustomerServiceList } from "@/components/providers/CSList";
-import { DiffDialog } from "./diffDialog";
 import { useDiffCustomerServiceList } from "@/components/providers/allCustomers";
 import { useDispItems } from "@/components/providers/DispItems";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 const calculateTargetIndex = (
   mousePosition: { x: number; y: number },
@@ -225,7 +230,7 @@ const CustomerServiceRow = React.memo((props: CustomerServiceRowProps) => {
   if ("asTitle" in props) {
     return (
       <motion.div
-        className="cs-row bg-pink-200 sticky top-[45px] z-30"
+        className="cs-row bg-indigo-200 sticky top-[45px] z-30"
         layoutRoot
       >
         <AnimatePresence>
@@ -347,8 +352,8 @@ type CustomerListProps = {
   selectedCustomers: CustomerInfo[];
   setSelectedCustomers: React.Dispatch<React.SetStateAction<CustomerInfo[]>>;
   droppableListRef: React.RefObject<HTMLUListElement>;
-  allStatusTabs:CsStatusId[];
-  setAllStatusTabs:React.Dispatch<React.SetStateAction<CsStatusId[]>>;
+  allStatusTabs: CsStatusId[];
+  setAllStatusTabs: React.Dispatch<React.SetStateAction<CsStatusId[]>>;
 };
 
 const CustomerList = React.memo(
@@ -358,9 +363,8 @@ const CustomerList = React.memo(
     setSelectedCustomers,
     droppableListRef,
     allStatusTabs,
-    setAllStatusTabs
+    setAllStatusTabs,
   }: CustomerListProps) => {
-    
     const [selectedStatus, setSelectedStatus] = React.useState<CsStatusId>(
       allStatusId[0]
     );
@@ -413,7 +417,7 @@ const CustomerList = React.memo(
                   >
                     <div
                       className={clsx(
-                        "w-full h-full rounded-lg relative text-wrap text-center text-zinc-800 flex items-center leading-4 px-2 hover:bg-pink-300/10"
+                        "w-full h-full rounded-lg relative text-wrap text-center text-zinc-800 flex items-center leading-4 px-2 hover:bg-indigo-300/10"
                       )}
                     >
                       {selectedStatus === status && (
@@ -560,7 +564,7 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
   if ("asTitle" in props) {
     return (
       <motion.div
-        className="w-full cs-row bg-pink-200 sticky top-[90px] z-30"
+        className="w-full cs-row bg-indigo-200 sticky top-[90px] z-30"
         layoutRoot
       >
         <AnimatePresence>
@@ -629,49 +633,65 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
     const kana = ["あ", "い", "う", "え", "お"];
 
     return (
-      <motion.div
-        className={clsx("w-full cs-row", props.selected && "bg-pink-300/10")}
-        onClick={props.handleCustomerClick(props.customer)}
-        layoutRoot
-      >
-        <AnimatePresence>
-          {props.cols.map((col) => (
-            <React.Fragment key={col.name}>
-              <motion.div
-                layout
-                style={{ width: customerListItemWidth[col.name] }}
-                exit={{ width: 0 }}
-                className="cs-cell text-wrap leading-4"
-              >
-                {col.name === "customerID" && (
-                  <div
-                    className="mr-2 transition-transform ease-in-out duration-200 origin-center flex items-center justify-center"
-                    onClick={handleOpenDetail}
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <motion.div
+            className={clsx(
+              "w-full cs-row",
+              props.selected && "bg-indigo-300/10"
+            )}
+            onClick={props.handleCustomerClick(props.customer)}
+            layoutRoot
+          >
+            <AnimatePresence>
+              {props.cols.map((col) => (
+                <React.Fragment key={col.name}>
+                  <motion.div
+                    layout
+                    style={{ width: customerListItemWidth[col.name] }}
+                    exit={{ width: 0 }}
+                    className="cs-cell text-wrap leading-4"
                   >
-                    <IconButton variant="ghost" radius="full" size={"1"}>
-                      <Plus className="w-3 h-3" />
-                    </IconButton>
-                  </div>
-                )}
-                {col.name === "customerName" ? (
-                  hasReview ? (
-                    <div className="w-full h-full flex flex-col items-start justify-between">
-                      <Link asChild>
-                        <LinkRrd
-                          to={`?customer=${props.customer.customerID}#customerReview`}
-                        >
-                          <Text>{props.customer[col.name]}</Text>
-                        </LinkRrd>
-                      </Link>
-                      <div className="w-full flex justify-around flex-nowrap">
-                        {reviews.map((review, i) => (
-                          <HoverCard key={i} openDelay={100}>
-                            <HoverCardTrigger>
-                              {review ? (
-                                <LinkRrd
-                                  to={`?customer=${props.customer.customerID}#customerReview`}
-                                >
-                                  <Link asChild>
+                    {col.name === "customerID" && (
+                      <div
+                        className="mr-2 transition-transform ease-in-out duration-200 origin-center flex items-center justify-center"
+                        onClick={handleOpenDetail}
+                      >
+                        <IconButton variant="ghost" radius="full" size={"1"}>
+                          <Plus className="w-3 h-3" />
+                        </IconButton>
+                      </div>
+                    )}
+                    {col.name === "customerName" ? (
+                      hasReview ? (
+                        <div className="w-full h-full flex flex-col items-start justify-between">
+                          <Link asChild>
+                            <LinkRrd
+                              to={`?customer=${props.customer.customerID}#customerReview`}
+                            >
+                              <Text>{props.customer[col.name]}</Text>
+                            </LinkRrd>
+                          </Link>
+                          <div className="w-full -mt-1 flex justify-around items-center flex-nowrap">
+                            {reviews.map((review, i) => (
+                              <HoverCard key={i} openDelay={100}>
+                                <HoverCardTrigger>
+                                  {review ? (
+                                    <Link asChild>
+                                      <LinkRrd
+                                        to={`?customer=${props.customer.customerID}#customerReview`}
+                                      >
+                                        <span
+                                          key={i}
+                                          className={clsx(
+                                            "text-xs text-indigo-600 underline font-semibold"
+                                          )}
+                                        >
+                                          {kana[i]}
+                                        </span>
+                                      </LinkRrd>
+                                    </Link>
+                                  ) : (
                                     <span
                                       key={i}
                                       className={clsx(
@@ -680,51 +700,46 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
                                     >
                                       {kana[i]}
                                     </span>
-                                  </Link>
-                                </LinkRrd>
-                              ) : (
-                                <span
-                                  key={i}
-                                  className={clsx(
-                                    "text-xs text-zinc-600 font-semibold"
                                   )}
-                                >
-                                  {kana[i]}
-                                </span>
-                              )}
-                            </HoverCardTrigger>
-                            {review && (
-                              <HoverCardContent>{review}</HoverCardContent>
-                            )}
-                          </HoverCard>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <Link asChild>
-                      <LinkRrd
-                        to={`?customer=${props.customer.customerID}#customerReview`}
-                      >
-                        <Text>{props.customer[col.name]}</Text>
-                      </LinkRrd>
-                    </Link>
-                  )
-                ) : col.link ? (
-                  <Link asChild>
-                    <LinkRrd
-                      to={`?customer=${props.customer.customerID}#customerReview`}
-                    >
+                                </HoverCardTrigger>
+                                {review && (
+                                  <HoverCardContent>{review}</HoverCardContent>
+                                )}
+                              </HoverCard>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <Link asChild>
+                          <LinkRrd
+                            to={`?customer=${props.customer.customerID}#customerReview`}
+                          >
+                            <Text>{props.customer[col.name]}</Text>
+                          </LinkRrd>
+                        </Link>
+                      )
+                    ) : col.link ? (
+                      <Link asChild>
+                        <LinkRrd
+                          to={`?customer=${props.customer.customerID}#customerReview`}
+                        >
+                          <Text>{props.customer[col.name]}</Text>
+                        </LinkRrd>
+                      </Link>
+                    ) : (
                       <Text>{props.customer[col.name]}</Text>
-                    </LinkRrd>
-                  </Link>
-                ) : (
-                  <Text>{props.customer[col.name]}</Text>
-                )}
-              </motion.div>
-            </React.Fragment>
-          ))}
-        </AnimatePresence>
-      </motion.div>
+                    )}
+                  </motion.div>
+                </React.Fragment>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem>Profile</ContextMenuItem>
+          <ContextMenuItem>Delete</ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -880,7 +895,7 @@ export const CSListView = React.memo(() => {
 
   const mousePositonRef = React.useRef({ x: 0, y: 0 });
   const [allStatusTabs, setAllStatusTabs] =
-  React.useState<CsStatusId[]>(allStatusId);
+    React.useState<CsStatusId[]>(allStatusId);
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       mousePositonRef.current = { x: e.clientX, y: e.clientY };
@@ -1057,7 +1072,6 @@ export const CSListView = React.memo(() => {
           "flex overflow-auto"
         )}
       >
-        <DiffDialog />
         <motion.section
           className={clsx("h-full overflow-auto flex-shrink-0")}
           animate={{

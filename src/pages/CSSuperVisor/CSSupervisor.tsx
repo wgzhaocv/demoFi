@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { RotateCcwIcon } from "lucide-react";
 import { animate, motion, useMotionValue } from "framer-motion";
 import { DispItemDialog } from "./DispItemsDialog";
+import { BlockView } from "./BlockView";
+import { DiffDialog } from "./diffDialog";
 
 const CSSuperVisor = () => {
   const { t } = useTranslation();
@@ -22,6 +24,7 @@ const CSSuperVisor = () => {
       <Tabs defaultValue="listMode" className="w-full">
         <div className="w-full flex justify-end gap-2 fixed right-40 top-5 z-40">
           <DispItemDialog />
+          <DiffDialog />
           <TabsList>
             <TabsTrigger value="listMode">{t("listMode")}</TabsTrigger>
             <TabsTrigger value="blockMode">{t("blockMode")}</TabsTrigger>
@@ -37,7 +40,9 @@ const CSSuperVisor = () => {
         <TabsContent value={"listMode"}>
           <CSListView />
         </TabsContent>
-        <TabsContent value="blockMode">Change your password here.</TabsContent>
+        <TabsContent value="blockMode">
+          <BlockView />
+        </TabsContent>
       </Tabs>
     </div>
   );

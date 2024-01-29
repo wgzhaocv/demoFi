@@ -34,7 +34,7 @@ export const csStatusMap = {
   "6": "Application Complete",
 };
 
-export const allStatusId = Object.keys(csStatusMap) as CsStatusId[];
+export const allStatusId = Object.keys(csStatusMap).sort() as CsStatusId[];
 
 export type CsStatus = (typeof csStatus)[number]["name"];
 export type CsStatusId = keyof typeof csStatusMap;

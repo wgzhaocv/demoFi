@@ -81,6 +81,7 @@ export type CustomerInfo = {
   subaccounts: CustomerSubaccount;
   review: CustomerReview;
   customerService: string;
+  avatar: string;
 };
 
 const generateCustomer = (customerService = ""): CustomerInfo => {
@@ -102,6 +103,7 @@ const generateCustomer = (customerService = ""): CustomerInfo => {
   const birthdayDD = birthday.getDate();
   const subaccounts = generateCustomerSubaccount(customerID);
   const review = generateCustomerReview();
+  const avatar = faker.image.avatarLegacy();
 
   return {
     customerName,
@@ -118,6 +120,7 @@ const generateCustomer = (customerService = ""): CustomerInfo => {
     subaccounts,
     review,
     customerService,
+    avatar,
   };
 };
 const satisfication = ["A", "B", "C"] as const;
