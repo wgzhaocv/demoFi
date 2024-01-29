@@ -698,9 +698,16 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
                     </Link>
                   )
                 ) : (
-                  <OptionLink isLink={col.link}>
-                    <Text>{props.customer[col.name]}</Text>
-                  </OptionLink>
+                  col.link?(
+                    <Link asChild>
+                      <LinkRrd
+                        to={`?customer=${props.customer.customerID}#customerReview`}
+                      >
+                        <Text>{props.customer[col.name]}</Text>
+                      </LinkRrd>
+                    </Link>
+                  ):(<Text>{props.customer[col.name]}</Text>)
+                  
                 )}
               </motion.div>
             </React.Fragment>

@@ -22,9 +22,9 @@ const diffCustomer = (customer1: CustomerInfo, customer2: CustomerInfo) => {
     const localKey = key as keyof CustomerInfo;
     if (localKey === "subaccounts") {
       if (customer1.subaccounts === customer2.subaccounts) continue;
-      customer1.subaccounts.forEach((subaccount, index) => {
-        //
-      });
+      // customer1.subaccounts.forEach((subaccount, index) => {
+      //   //
+      // });
     } else if (localKey === "review") {
       if (customer1.review === customer2.review) continue;
 
@@ -116,8 +116,8 @@ export const DiffDialog = () => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("Confirm Customer Changes")}</DialogTitle>
-          <DialogDescription>
-            {customerDiff.length === 0 && (
+          <div>
+          {customerDiff.length === 0 && (
               <div className="my-2">{t("No Changes")}</div>
             )}
             {customerDiff.length > 0 && (
@@ -139,12 +139,12 @@ export const DiffDialog = () => {
                   </div>
                   <div
                     ref={contentRef}
-                    className="max-h-[60vh] py-2 flex flex-col overflow-auto"
+                    className="max-h-[60vh] box-border px-12 py-2 flex flex-col overflow-y-auto overflow-x-hidden"
                   >
                     {customerDiff.map((customer) => (
                       <div
                         key={customer.customerID}
-                        className="w-full mb-4 last:mb-0 flex flex-col"
+                        className="w-[fit-content] mb-4 last:mb-0 flex flex-col"
                       >
                         <h2
                           className="mb-2 text-lg font-semibold text-black"
@@ -152,7 +152,7 @@ export const DiffDialog = () => {
                         >
                           {customer.customerName}
                         </h2>
-                        <div className="w-full flex flex-nowrap border-y border-zinc-800  text-zinc-800">
+                        <div className="w-[fit-content] flex flex-nowrap border-y border-zinc-800  text-zinc-800">
                           <div className=" h-full w-32 border-x border-zinc-800 flex-grow-0 flex-shrink-0 font-bold flex items-center">
                             {t("Item Name")}
                           </div>
@@ -164,19 +164,19 @@ export const DiffDialog = () => {
                           </div>
                         </div>
                         {Object.keys(customer.diff).map((key) => {
-                          let localKey = key.split(":");
+                          const localKey = key.split(":");
                           return (
                             <div
                               key={key}
-                              className="w-full flex flex-nowrap border-b border-zinc-800"
+                              className="w-[fit-content] flex flex-nowrap border-b border-zinc-800"
                             >
-                              <div className="text-zinc-800 h-full  border-x border-zinc-800 w-32 flex-grow-0 flex-shrink-0 flex items-center">
-                                <pre>
+                              <div className="text-zinc-800 text-wrap text-sm border-x border-zinc-800 w-32 flex-grow-0 flex-shrink-0 flex items-center">
+                                <span>
                                   {localKey.reduce((pre, cur, i) => {
                                     if (i === 0) return pre + t(cur);
                                     return pre + "\n  " + cur;
                                   }, "")}
-                                </pre>
+                                </span>
                               </div>
                               <div className="text-zinc-700 h-auto  border-r border-zinc-800 w-52 flex-grow-0 flex-shrink-0 flex items-center">
                                 <span className="bg-pink-300/80 text-pink-950/90">
@@ -197,7 +197,7 @@ export const DiffDialog = () => {
                 </div>
               </div>
             )}
-          </DialogDescription>
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpenDiff(false)}>
               {t("cancel")}
