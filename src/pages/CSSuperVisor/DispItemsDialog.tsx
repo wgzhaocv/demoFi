@@ -3,10 +3,8 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogPortal,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -20,7 +18,6 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
-import { CustomerListItemName } from "@/components/providers/CSItemsWidthProvider";
 import clsx from "clsx";
 import {
   DragDropContext,
@@ -28,11 +25,6 @@ import {
   Droppable,
   OnDragEndResponder,
 } from "react-beautiful-dnd";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 export const DispItemDialog = () => {
   const [openDispItems, setOpenDispItems] = React.useState(false);
@@ -154,6 +146,7 @@ export const DispItemDialog = () => {
         }
       }
     } else {
+      //
     }
   };
 

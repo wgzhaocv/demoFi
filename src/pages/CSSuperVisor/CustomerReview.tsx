@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { IconButton, Link, Text, Tooltip } from "@radix-ui/themes";
+import {   Text } from "@radix-ui/themes";
 import { useCustomerServiceList } from "@/components/providers/CSList";
 import "./CustomerReview.css";
 import clsx from "clsx";
@@ -50,8 +50,8 @@ type CustomerServiceHistoryRowProps =
 
 const CustomerServiceHistoryRow = React.memo(
   (props: CustomerServiceHistoryRowProps) => {
+    const { t } = useTranslation();
     if ("asTitle" in props) {
-      const { t } = useTranslation();
       return (
         <div className="customer-history-row bg-pink-200 sticky ">
           {props.cols.map((col) => {
@@ -84,7 +84,7 @@ const CustomerServiceHistoryRow = React.memo(
           } else {
             return (
               <div key={col.name} className="customer-history-cell">
-                <Text>{props.customerReview.customer[col.name]}</Text>
+                <Text>{props.customerReview.customer[col.name] as unknown as string}</Text>
               </div>
             );
           }
@@ -106,7 +106,8 @@ const CustomerServiceHistory = React.memo(
     customerInfo,
     setCustomerInfo,
   }: CustomerServiceHistoryProps) => {
-    const [cols, setCols] = React.useState<columns[]>([
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [cols] = React.useState<columns[]>([
       { name: "customerName" },
       { name: "customerID" },
       { name: "mailAddress" },
@@ -227,9 +228,8 @@ const CustomerReviewDetail = React.memo(
   }
 );
 
-type CustomerReviewProps = {};
 
-export const CustomerReview = React.memo(({}: CustomerReviewProps) => {
+export const CustomerReview = React.memo(() => {
   const { customerInfo, customerServiceHistory, setCustomerInfo } =
     useCustomerServiceList();
   const ref = React.useRef<HTMLDivElement>(null);
@@ -263,6 +263,7 @@ export const CustomerReview = React.memo(({}: CustomerReviewProps) => {
     if (!isInView) {
       navigate(location.pathname);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInView]);
   return (
     <section

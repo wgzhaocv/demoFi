@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -88,6 +87,7 @@ export const DiffDialog = () => {
     setCustomerDiff(
       computeDiff().sort((a, b) => a.customerID.localeCompare(b.customerID))
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openDiff]);
 
   const handleConfirmDiff = () => {

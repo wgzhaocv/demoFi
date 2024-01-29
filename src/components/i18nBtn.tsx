@@ -24,6 +24,7 @@ export function I18nButton() {
   const changeLanguage = React.useCallback((lang: Lang) => {
     i18n.changeLanguage(lang.lang);
     setLang(lang);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

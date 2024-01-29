@@ -1,24 +1,19 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import React, { useEffect, useTransition } from "react";
+import React, { useEffect } from "react";
 import clsx from "clsx";
 import {
   ChevronDown,
-  ChevronsDown,
   ChevronsLeft,
   ChevronsRight,
-  DeleteIcon,
   Plus,
   XCircle,
 } from "lucide-react";
 import "./tablecss.css";
 import { useTranslation } from "react-i18next";
-import testData from "@/TestData/CSSuperVisor.json";
 import { CsStatusId, allStatusId, csStatusMap } from "@/lib/status";
 import {
   AnimatePresence,
   motion,
-  transform,
-  useWillChange,
 } from "framer-motion";
 import {
   CustomerListItemName,
@@ -38,7 +33,6 @@ import {
   NotDraggingStyle,
 } from "react-beautiful-dnd";
 import { toast } from "sonner";
-import { Collapse } from "@/components/ui/collapse";
 import {
   CustomerInfo,
   CustomerService,
@@ -54,8 +48,6 @@ import {
 import {
   Link as LinkRrd,
   useLocation,
-  useParams,
-  useSearchParams,
 } from "react-router-dom";
 import { useCustomerServiceList } from "@/components/providers/CSList";
 import { DiffDialog } from "./diffDialog";
@@ -93,7 +85,7 @@ const CustomerServiceList = ({
       </div>
       <CustomerServiceRow asTitle cols={cols} setCols={setCols} />
       <Droppable droppableId={"CustomerServiceList"}>
-        {(provided, snapshot) => (
+        {(provided) => (
           <motion.div
             ref={provided.innerRef}
             {...provided.droppableProps}
@@ -149,7 +141,7 @@ const CustomerServiceGroup = ({
 
   return (
     <Draggable draggableId={customerService} index={i} isDragDisabled>
-      {(provided, snapshot) => (
+      {(provided) => (
         <div
           ref={provided.innerRef}
           className={clsx("w-full flex flex-col")}
@@ -263,6 +255,7 @@ const CustomerServiceRow = React.memo((props: CustomerServiceRowProps) => {
         return !pre;
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.setOpen]
   );
 
@@ -372,6 +365,7 @@ const CustomerList = React.memo(
           });
         }
       };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const { t } = useTranslation();
@@ -438,7 +432,7 @@ const CustomerList = React.memo(
         </ul>
         <CustomerRow asTitle cols={cols} />
         <Droppable droppableId={"CustomerList"}>
-          {(provided, snapshot) => (
+          {(provided) => (
             <motion.div
               ref={provided.innerRef}
               {...provided.droppableProps}
@@ -715,6 +709,7 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
         </AnimatePresence>
       </motion.div>
     );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     props.cols,
     props.customer,
@@ -777,8 +772,8 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
   );
 });
 
-type CSListViewProps = {};
-export const CSListView = React.memo(({}: CSListViewProps) => {
+
+export const CSListView = React.memo(() => {
   const { setCustomerListFrom, setCustomerListTo } =
     useDiffCustomerServiceList();
 
@@ -834,10 +829,12 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
       );
       setRightList(customersLists);
     })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const customerTo: CustomerInfo[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Object.entries(rightList).forEach(([_, customers]) => {
       customers.forEach((c) => {
         customerTo.push(c);
@@ -854,6 +851,7 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
     });
 
     setCustomerListTo(customerTo);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leftList, rightList]);
 
   const [selectedCustomers, setSelectedCustomers] = React.useState<
@@ -944,6 +942,7 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
         if (error instanceof Error) toast.error(error.message);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [leftList, rightList, selectedCustomers]
   );
 
@@ -958,6 +957,7 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
       });
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Object.entries(rightList).forEach(([_, customers]) => {
       customers.forEach((c) => {
         customerLocalMap[c.customerID] = c;
@@ -1008,6 +1008,7 @@ export const CSListView = React.memo(({}: CSListViewProps) => {
         if (customer) setCustomerInfo(customer);
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location, customerMap, customerServiceMap]);
 
   const [open, setOpen] = React.useState<-1 | 0 | 1>(0);
