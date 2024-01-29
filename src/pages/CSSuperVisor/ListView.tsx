@@ -373,7 +373,7 @@ const CustomerList = React.memo(
       <div className="w-[fit-content]">
         <div className="cs-row w-full justify-center sticky top-0 bg-white text-lg z-30">
           <Text size={"4"} weight={"bold"}>
-            {t("Customer Service List")}
+            {t("Customer List")}
           </Text>
         </div>
 
@@ -896,12 +896,14 @@ export const CSListView = React.memo(() => {
             ...c,
             status: newStatus,
           }));
+          console.log(">>>",newStatus,customerListMove,newCustomerListMove);
 
           if (newStatus !== status) {
             newRightList = {
               ...newRightList,
               [newStatus]: [...newRightList[newStatus], ...newCustomerListMove],
             };
+            
             setRightList(newRightList);
             toast.success(
               `${t("Customer is added to status")}${t(csStatusMap[newStatus])}`

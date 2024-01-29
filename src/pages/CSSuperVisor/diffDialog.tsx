@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { CsStatusId, csStatusMap } from "@/lib/status";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -124,7 +125,7 @@ export const DiffDialog = () => {
               <div className="max-h-[70vh] flex items-center">
                 <div className="flex gap-2">
                   <div className="h-full mr-2 mt-4 overflow-auto">
-                    <div className="font-bold mb-2 text-black text-sm">
+                    <div className="font-bold mb-2 text-black text-sm whitespace-nowrap">
                       {t("Changed Customers")}
                     </div>
                     {customerDiff.map((customer) => (
@@ -180,12 +181,16 @@ export const DiffDialog = () => {
                               </div>
                               <div className="text-zinc-700 h-auto  border-r border-zinc-800 w-52 flex-grow-0 flex-shrink-0 flex items-center">
                                 <span className="bg-pink-300/80 text-pink-950/90">
-                                  {customer.diff[key][0]}
+                                  {key==='status'?(
+                                    <>{t(csStatusMap[customer.diff[key][0] as CsStatusId])}</>
+                                  ):(<>{customer.diff[key][0]}</>)}
                                 </span>
                               </div>
                               <div className="text-zinc-700  h-auto  border-r border-zinc-800 w-52 flex-grow-0 flex-shrink-0 flex items-center">
                                 <span className="bg-green-200 text-green-900">
-                                  {customer.diff[key][1]}
+                                {key==='status'?(
+                                    <>{t(csStatusMap[customer.diff[key][1] as CsStatusId])}</>
+                                  ):(<>{customer.diff[key][1]}</>)}
                                 </span>
                               </div>
                             </div>

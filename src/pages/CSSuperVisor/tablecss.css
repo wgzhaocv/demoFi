@@ -28,21 +28,34 @@
   ::-webkit-scrollbar {
     width: 10px; /* 滚动条的宽度 */
     height: 10px;
+    
   }
-
-  /* 滚动条轨道 */
-  ::-webkit-scrollbar-track {
+  * {
+    scrollbar-width: thin; /* 可选值：auto, thin, none */
+    scrollbar-color: #888 #f1f1f1; /* 滑块颜色 轨道颜色 */
+  }
+  * {
+    scrollbar-width: thin; /* 可选值：auto, thin, none */
+    scrollbar-color: #888 #f1f1f1; /* 滑块颜色 轨道颜色 */
+  }
+  
+  /* WebKit (Chrome, Safari, 新版Edge) */
+  *::-webkit-scrollbar {
+    width: 10px; /* 滚动条的宽度 */
+    height: 10px;
+    
+  }
+  
+  *::-webkit-scrollbar-track {
     background: #f1f1f1; /* 轨道的颜色 */
   }
-
-  /* 滚动条的滑块 */
-  ::-webkit-scrollbar-thumb {
+  
+  *::-webkit-scrollbar-thumb {
     background: #888; /* 滑块的颜色 */
     border-radius: 10px; /* 滑块的圆角 */
   }
-
-  /* 当鼠标悬停在滚动条上时，改变滑块的颜色 */
-  ::-webkit-scrollbar-thumb:hover {
+  
+  *::-webkit-scrollbar-thumb:hover {
     background: #555; /* 悬停时滑块的颜色 */
   }
 }
