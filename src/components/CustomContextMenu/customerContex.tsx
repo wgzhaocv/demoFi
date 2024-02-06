@@ -3,14 +3,14 @@ import { CustomerInfo } from "@/TestData/fakeData";
 export const customerContextMenuList = [
   {
     id: "1",
-    label: "Edit Customer Info",
+    label: "Edit",
     onClick: () => {
       console.log("Edit");
     },
   },
   {
     id: "3",
-    label: "Check Customer Info",
+    label: "Check",
     onClick: () => {
       console.log("Add");
     },
@@ -28,7 +28,7 @@ export const customerContextMenuList = [
       },
       {
         id: "6",
-        label: "change Status",
+        label: "Change Status",
         onClick: () => {
           console.log("Add Task");
         },
@@ -37,7 +37,7 @@ export const customerContextMenuList = [
   },
   {
     id: "2",
-    label: "Delete Customer",
+    label: "Delete",
     alert: true,
     onClick: () => {
       console.log("Delete");

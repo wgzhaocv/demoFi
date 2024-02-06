@@ -13,6 +13,7 @@ import {
 } from "../ui/dropdown-menu";
 import clsx from "clsx";
 import { useCustomContextMenu } from "../providers/CustomerContextMenuProvider";
+import { useTranslation } from "react-i18next";
 
 type CustomerContextMenuProps = {
   children: React.ReactNode;
@@ -25,6 +26,7 @@ export const CustomerContextMenuProvider = ({
   const customer = useCustomContextMenu((state) => state.customer);
   const clearData = useCustomContextMenu((state) => state.clearData);
   const ref = React.useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   const memoizedChildren = React.useMemo(() => children, [children]);
 
@@ -56,14 +58,16 @@ export const CustomerContextMenuProvider = ({
             }}
           >
             <DropdownMenuLabel>
-              {customer?.customerName || "Customer"}
+              {customer?.customerName
+                ? t("Customer") + t(": ") + customer.customerName
+                : t("Customer")}
             </DropdownMenuLabel>
             {customerContextMenuList.map((customermenu) => {
               if (customermenu.sub) {
                 return (
                   <DropdownMenuSub key={customermenu.id}>
                     <DropdownMenuSubTrigger>
-                      {customermenu.label}
+                      {t(customermenu.label)}
                     </DropdownMenuSubTrigger>
                     <DropdownMenuSubContent>
                       {customermenu.sub.map((subitem) => {
@@ -75,7 +79,7 @@ export const CustomerContextMenuProvider = ({
                               clearData();
                             }}
                           >
-                            {subitem.label}
+                            {t(subitem.label)}
                           </DropdownMenuItem>
                         );
                       })}
@@ -94,7 +98,7 @@ export const CustomerContextMenuProvider = ({
                     <span
                       className={clsx(customermenu.alert && "text-red-600")}
                     >
-                      {customermenu.label}
+                      {t(customermenu.label)}
                     </span>
                   </DropdownMenuItem>
                 );
