@@ -11,7 +11,7 @@ export const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
         className={clsx("sm:px-8 h-screen snap-center", className)}
         {...props}
       >
-        <div className="h-full mx-auto max-x-7xl py-2 lg:px-8 flex items-center justify-center">
+        <div className="h-full mx-auto max-x-7xl py-2 lg:px-8  flex flex-col items-center justify-center">
           {children}
         </div>
       </div>

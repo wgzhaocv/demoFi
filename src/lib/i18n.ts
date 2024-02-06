@@ -62,6 +62,10 @@ const resources = {
       "Asign CS": "Asign CS",
       "Change Status": "Change Status",
       Delete: "Delete",
+      "Download To Csv": "Download To Csv",
+      "Select Csv Title Items": "Select Csv Title Items",
+      Download: "Download",
+      mynumber: "My Number",
     },
   },
   jp: {
@@ -122,6 +126,10 @@ const resources = {
       "Asign CS": "CSを割り当てる",
       "Change Status": "ステータスを変更",
       Delete: "削除",
+      "Download To Csv": "CSVにダウンロード",
+      "Select Csv Title Items": "CSVタイトル項目を選択する",
+      Download: "ダウンロード",
+      mynumber: "マイナンバー",
     },
   },
 };

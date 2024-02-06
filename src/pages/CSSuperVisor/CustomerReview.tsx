@@ -122,7 +122,7 @@ const CustomerServiceHistory = React.memo(
       "処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析";
     return (
       <div className="h-full flex flex-col justify-between ">
-        <div className="h-full w-[fit-content] flex flex-col border-b border-zinc-400/90">
+        <div className="h-[fit-content] w-[fit-content] flex flex-col border-b border-zinc-400/90">
           <ReviewHeader
             name={cusutomerServiceSummary?.customerServiceId ?? ""}
             isCs
@@ -144,7 +144,7 @@ const CustomerServiceHistory = React.memo(
           </div>
         </div>
 
-        <div className="h-[200px] flex-shrink-0 flex-grow-0 place-content-end p-1">
+        <div className="h-[200px] min-w-[800px] flex-shrink-0 flex-grow-0 place-content-end p-1">
           <div className="w-full font-semibold">
             {t("CS Evaluation") + t(": ")}
           </div>
@@ -269,11 +269,11 @@ export const CustomerReview = React.memo(() => {
     <section
       ref={ref}
       id="customerReview"
-      className="w-[90vw] h-[80vh] rounded-lg shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/10 relative flex"
+      className="w-[90vw] h-[30vh] mt-5 rounded-lg shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/10 relative flex"
     >
       <motion.div
         ref={viewref}
-        className="flex-grow-0 flex-shrink-0 overflow-hidden"
+        className="flex-grow-0 flex-shrink-0 overflow-auto"
         animate={{
           width: open === -1 ? "100px" : open === 1 ? "85vw" : "auto",
         }}
@@ -284,7 +284,7 @@ export const CustomerReview = React.memo(() => {
           customerInfo={customerInfo}
         />
       </motion.div>
-      <div className="h-full flex flex-col justify-center gap-48 bg-zinc-400/30 sticky top-0 flex-grow-0 flex-shrink-0">
+      <div className="h-full flex flex-col justify-center gap-24 bg-zinc-400/30 sticky top-0 flex-grow-0 flex-shrink-0">
         <Button
           variant="ghost"
           className="mx-auto p-0 h-[fit-content]"

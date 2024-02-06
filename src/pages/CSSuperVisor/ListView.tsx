@@ -39,6 +39,7 @@ import {
 import {
   HoverCard,
   HoverCardContent,
+  HoverCardPortal,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 
@@ -47,6 +48,9 @@ import { useCustomerServiceList } from "@/components/providers/CSList";
 import { useDiffCustomerServiceList } from "@/components/providers/allCustomers";
 import { useDispItems } from "@/components/providers/DispItems";
 import { useCustomContextMenu } from "@/components/providers/CustomerContextMenuProvider";
+import { CustommerCardSimple } from "../CustomerCard/customerCardSimple";
+import { useCheckedCustomers } from "@/components/providers/checkedCustomers";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const calculateTargetIndex = (
   mousePosition: { x: number; y: number },
@@ -386,6 +390,16 @@ const CustomerList = React.memo(
 
     const { t } = useTranslation();
     const costomer = useCustomContextMenu((state) => state.customer);
+    const checkedCustomers = useCheckedCustomers((state) => state.customers);
+    const clearCustomers = useCheckedCustomers(
+      (state) => state.removeAllCustomers
+    );
+    const addCustomers = useCheckedCustomers((state) => state.addCustomers);
+
+    useEffect(() => {
+      clearCustomers();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedStatus]);
 
     const memoizedTitleRow = React.useMemo(
       () => (
@@ -457,11 +471,22 @@ const CustomerList = React.memo(
       [allStatusTabs, droppableListRef, selectedStatus, setAllStatusTabs, t]
     );
 
+    const checkAllCustomers = React.useCallback(
+      () => addCustomers(customers[selectedStatus]),
+      [customers, selectedStatus, addCustomers]
+    );
+
     return (
       <div className="w-[fit-content]">
         {memoizedTitleRow}
         {memoizedHeaderRow}
-        <CustomerRow asTitle cols={cols} />
+        <CustomerRow
+          asTitle
+          cols={cols}
+          checked={checkedCustomers.length === customers[selectedStatus].length}
+          checkAll={checkAllCustomers}
+          uncheckAll={clearCustomers}
+        />
         <Droppable droppableId={"CustomerList"}>
           {(provided) => (
             <motion.div
@@ -478,6 +503,7 @@ const CustomerList = React.memo(
                   handleCustomerClick={handleCustomerClick}
                   selected={selectedCustomers.includes(customer)}
                   rightClicked={costomer === customer}
+                  checked={checkedCustomers.includes(customer)}
                 />
               ))}
               {provided.placeholder}
@@ -555,6 +581,9 @@ type CustomerRowprops =
   | {
       asTitle: boolean;
       cols: CustomeListColsAttr[];
+      checked: boolean;
+      checkAll: () => void;
+      uncheckAll: () => void;
     }
   | {
       customer: CustomerInfo;
@@ -562,6 +591,7 @@ type CustomerRowprops =
       index: number;
       selected?: boolean;
       rightClicked?: boolean;
+      checked?: boolean;
       handleCustomerClick: (
         customer: CustomerInfo
       ) => (e: React.MouseEvent) => void;
@@ -579,6 +609,21 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
         layoutRoot
       >
         <AnimatePresence>
+          <div className="cs-cell text-wrap leading-4">
+            <Checkbox
+              checked={props.checked}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  props.checkAll();
+                } else {
+                  props.uncheckAll();
+                }
+              }}
+            />
+          </div>
           {props.cols.map((col) => (
             <React.Fragment key={col.name}>
               <motion.div
@@ -627,6 +672,8 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
     });
   }, []);
   const setData = useCustomContextMenu((state) => state.setData);
+  const checkCustomer = useCheckedCustomers((state) => state.addCustomer);
+  const unchceckCustomer = useCheckedCustomers((state) => state.removeCustomer);
 
   const rowDetail = React.useMemo(() => {
     const hasReview =
@@ -644,79 +691,29 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
     ];
     const kana = ["あ", "い", "う", "え", "お"];
 
-    return (
-      <AnimatePresence>
-        {props.cols.map((col) => (
-          <React.Fragment key={col.name}>
-            <motion.div
-              layout
-              style={{ width: customerListItemWidth[col.name] }}
-              exit={{ width: 0 }}
-              className="cs-cell text-wrap leading-4"
-            >
-              {col.name === "customerID" && (
-                <div
-                  className="mr-2 transition-transform ease-in-out duration-200 origin-center flex items-center justify-center"
-                  onClick={handleOpenDetail}
-                >
-                  <IconButton variant="ghost" radius="full" size={"1"}>
-                    <Plus className="w-3 h-3" />
-                  </IconButton>
-                </div>
-              )}
-              {col.name === "customerName" ? (
-                hasReview ? (
-                  <div className="w-full h-full flex flex-col items-start justify-between">
-                    <HoverCard>
-                      <HoverCardTrigger asChild>
-                        <Link asChild>
-                          <LinkRrd
-                            to={`?customer=${props.customer.customerID}#customerReview`}
-                          >
-                            <Text>{props.customer[col.name]}</Text>
-                          </LinkRrd>
-                        </Link>
-                      </HoverCardTrigger>
-                      <HoverCardContent>123</HoverCardContent>
-                    </HoverCard>
-                    <div className="w-full -mt-1 flex justify-around items-center flex-nowrap">
-                      {reviews.map((review, i) => (
-                        <HoverCard key={i} openDelay={100}>
-                          <HoverCardTrigger>
-                            {review ? (
-                              <Link asChild>
-                                <LinkRrd
-                                  to={`?customer=${props.customer.customerID}#customerReview`}
-                                >
-                                  <span
-                                    key={i}
-                                    className={clsx(
-                                      "text-xs text-indigo-600 underline font-semibold"
-                                    )}
-                                  >
-                                    {kana[i]}
-                                  </span>
-                                </LinkRrd>
-                              </Link>
-                            ) : (
-                              <span
-                                key={i}
-                                className={clsx(
-                                  "text-xs text-zinc-600 font-semibold"
-                                )}
-                              >
-                                {kana[i]}
-                              </span>
-                            )}
-                          </HoverCardTrigger>
-                          {review && (
-                            <HoverCardContent>{review}</HoverCardContent>
-                          )}
-                        </HoverCard>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
+    return props.cols.map((col) => (
+      <motion.div
+        layout
+        key={col.name}
+        style={{ width: customerListItemWidth[col.name] }}
+        exit={{ width: 0 }}
+        className="cs-cell text-wrap leading-4"
+      >
+        {col.name === "customerID" && (
+          <div
+            className="mr-2 transition-transform ease-in-out duration-200 origin-center flex items-center justify-center"
+            onClick={handleOpenDetail}
+          >
+            <IconButton variant="ghost" radius="full" size={"1"}>
+              <Plus className="w-3 h-3" />
+            </IconButton>
+          </div>
+        )}
+        {col.name === "customerName" ? (
+          hasReview ? (
+            <div className="w-full h-full flex flex-col items-start justify-between">
+              <HoverCard>
+                <HoverCardTrigger asChild>
                   <Link asChild>
                     <LinkRrd
                       to={`?customer=${props.customer.customerID}#customerReview`}
@@ -724,8 +721,55 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
                       <Text>{props.customer[col.name]}</Text>
                     </LinkRrd>
                   </Link>
-                )
-              ) : col.link ? (
+                </HoverCardTrigger>
+                <HoverCardPortal>
+                  <HoverCardContent asChild>
+                    <CustommerCardSimple
+                      customer={props.customer}
+                      index={props.index}
+                      popover
+                    />
+                  </HoverCardContent>
+                </HoverCardPortal>
+              </HoverCard>
+              <div className="w-full -mt-1 flex justify-around items-center flex-nowrap">
+                {reviews.map((review, i) => (
+                  <HoverCard key={i} openDelay={100}>
+                    <HoverCardTrigger>
+                      {review ? (
+                        <Link asChild>
+                          <LinkRrd
+                            to={`?customer=${props.customer.customerID}#customerReview`}
+                          >
+                            <span
+                              key={i}
+                              className={clsx(
+                                "text-xs text-indigo-600 underline font-semibold"
+                              )}
+                            >
+                              {kana[i]}
+                            </span>
+                          </LinkRrd>
+                        </Link>
+                      ) : (
+                        <span
+                          key={i}
+                          className={clsx(
+                            "text-xs text-zinc-600 font-semibold"
+                          )}
+                        >
+                          {kana[i]}
+                        </span>
+                      )}
+                    </HoverCardTrigger>
+                    {review && <HoverCardContent>{review}</HoverCardContent>}
+                  </HoverCard>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <HoverCard>
+              <HoverCardTrigger asChild>
                 <Link asChild>
                   <LinkRrd
                     to={`?customer=${props.customer.customerID}#customerReview`}
@@ -733,15 +777,38 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
                     <Text>{props.customer[col.name]}</Text>
                   </LinkRrd>
                 </Link>
-              ) : (
-                <Text>{props.customer[col.name]}</Text>
-              )}
-            </motion.div>
-          </React.Fragment>
-        ))}
-      </AnimatePresence>
-    );
-  }, [customerListItemWidth, handleOpenDetail, props.cols, props.customer]);
+              </HoverCardTrigger>
+              <HoverCardPortal>
+                <HoverCardContent asChild>
+                  <CustommerCardSimple
+                    customer={props.customer}
+                    index={props.index}
+                    popover
+                  />
+                </HoverCardContent>
+              </HoverCardPortal>
+            </HoverCard>
+          )
+        ) : col.link ? (
+          <Link asChild>
+            <LinkRrd
+              to={`?customer=${props.customer.customerID}#customerReview`}
+            >
+              <Text>{props.customer[col.name]}</Text>
+            </LinkRrd>
+          </Link>
+        ) : (
+          <Text>{props.customer[col.name]}</Text>
+        )}
+      </motion.div>
+    ));
+  }, [
+    customerListItemWidth,
+    handleOpenDetail,
+    props.cols,
+    props.customer,
+    props.index,
+  ]);
 
   const row = React.useMemo(() => {
     return (
@@ -755,7 +822,24 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
         onContextMenu={setData(props.customer)}
         layoutRoot
       >
-        {rowDetail}
+        <AnimatePresence>
+          <div className="cs-cell text-wrap leading-4">
+            <Checkbox
+              checked={props.checked}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              onCheckedChange={(checked) => {
+                if (!checked) {
+                  unchceckCustomer(props.customer);
+                } else {
+                  checkCustomer(props.customer);
+                }
+              }}
+            />
+          </div>
+          {rowDetail}
+        </AnimatePresence>
       </motion.div>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -765,6 +849,7 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
     props.handleCustomerClick,
     setData,
     props.rightClicked,
+    props.checked,
     rowDetail,
   ]);
 
@@ -1085,7 +1170,7 @@ export const CSListView = React.memo(() => {
     <DragDropContext onDragEnd={handleDragEnd}>
       <div
         className={clsx(
-          "h-[80vh] w-[90vw] rounded-lg shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/10 relative",
+          "h-[50vh] w-[90vw] rounded-lg shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/10 relative",
           "flex overflow-auto"
         )}
       >

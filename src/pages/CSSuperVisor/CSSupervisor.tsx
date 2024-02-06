@@ -9,6 +9,8 @@ import { animate, motion, useMotionValue } from "framer-motion";
 import { DispItemDialog } from "./DispItemsDialog";
 import { BlockView } from "./BlockView";
 import { DiffDialog } from "./diffDialog";
+import { CustomerReview } from "./CustomerReview";
+import { DownloadButton } from "./DownloadButton";
 
 const CSSuperVisor = () => {
   const { t } = useTranslation();
@@ -25,6 +27,7 @@ const CSSuperVisor = () => {
         <div className="w-full flex justify-end gap-2 fixed right-40 top-5 z-40">
           <DispItemDialog />
           <DiffDialog />
+          <DownloadButton />
           <TabsList>
             <TabsTrigger value="listMode">{t("listMode")}</TabsTrigger>
             <TabsTrigger value="blockMode">{t("blockMode")}</TabsTrigger>
@@ -39,6 +42,7 @@ const CSSuperVisor = () => {
 
         <TabsContent value={"listMode"}>
           <CSListView />
+          <CustomerReview />
         </TabsContent>
         <TabsContent value="blockMode">
           <BlockView />

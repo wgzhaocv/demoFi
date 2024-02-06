@@ -1,18 +1,13 @@
 import { Container } from "@/components/ui/container";
 import "./BlockView.css";
-import {
-  DragDropContext,
-  Draggable,
-  DropResult,
-  Droppable,
-} from "react-beautiful-dnd";
+import { DragDropContext, DropResult, Droppable } from "react-beautiful-dnd";
 import { CustomerInfo, generateCSs } from "@/TestData/fakeData";
 import { CsStatusId, allStatusId, csStatusMap } from "@/lib/status";
 import React, { useEffect } from "react";
 import { useDiffCustomerServiceList } from "@/components/providers/allCustomers";
-import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
+import { CustommerCardSimple } from "../CustomerCard/customerCardSimple";
 
 export const BlockView = () => {
   const { setCustomerListFrom, setCustomerListTo } =
@@ -110,7 +105,7 @@ export const BlockView = () => {
   return (
     <Container>
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-6 gap-4 -mb-10 h-[90vh] w-[90vw] overflow-auto">
+        <div className="grid grid-cols-6 gap-4 -mb-12 h-[90vh] w-[90vw] overflow-auto">
           {allStatusId.map((statusId) => {
             return (
               <Droppable key={statusId} droppableId={statusId}>
@@ -127,53 +122,10 @@ export const BlockView = () => {
                     </div>
                     {customerLists[statusId].map((customer, index) => {
                       return (
-                        <Draggable
-                          draggableId={customer.customerID}
-                          key={customer.customerID}
+                        <CustommerCardSimple
+                          customer={customer}
                           index={index}
-                        >
-                          {(provided) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={clsx(
-                                "customer-block-card cursor-pointer"
-                              )}
-                            >
-                              <div className="w-full flex items-center justify-center">
-                                <img
-                                  className="w-10 h-10 rounded-full"
-                                  src={customer.avatar}
-                                />
-                              </div>
-                              <div className="w-full flex mt-4">
-                                <label className="w-1/3 text-sm font-semibold text-zinc-900/90 flex-grow-0 flex-shrink-0">
-                                  {t("customerName") + t(": ")}
-                                </label>
-                                <div className="flex-1 text-nowrap whitespace-nowrap overflow-hidden">
-                                  {customer.customerName}
-                                </div>
-                              </div>
-                              <div className="w-full flex">
-                                <label className="w-1/3  text-sm font-semibold text-zinc-900/90 flex-grow-0 flex-shrink-0">
-                                  {t("telephone") + t(": ")}
-                                </label>
-                                <div className="flex-1 text-nowrap whitespace-nowrap overflow-hidden">
-                                  {customer.telephone}
-                                </div>
-                              </div>
-                              <div className="w-full flex">
-                                <label className="w-1/3 text-sm font-semibold text-zinc-900/90 flex-grow-0 flex-shrink-0">
-                                  {t("status") + t(": ")}
-                                </label>
-                                <div className="flex-1 text-nowrap whitespace-nowrap overflow-hidden">
-                                  {t(csStatusMap[customer.status])}
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </Draggable>
+                        />
                       );
                     })}
                     {provided.placeholder}
