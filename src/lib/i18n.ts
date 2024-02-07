@@ -66,6 +66,10 @@ const resources = {
       "Select Csv Title Items": "Select Csv Title Items",
       Download: "Download",
       mynumber: "My Number",
+      "FX Balance": "FX Balance",
+      "BO Balance": "BO Balance",
+      "Main Balance": "Main Balance",
+      "Total Balance": "Total Balance",
     },
   },
   jp: {
@@ -130,6 +134,10 @@ const resources = {
       "Select Csv Title Items": "CSVタイトル項目を選択する",
       Download: "ダウンロード",
       mynumber: "マイナンバー",
+      "FX Balance": "FX残高",
+      "BO Balance": "BO残高",
+      "Main Balance": "Main残高",
+      "Total Balance": "総残高",
     },
   },
 };
