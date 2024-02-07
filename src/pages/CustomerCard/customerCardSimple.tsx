@@ -6,7 +6,6 @@ import {
 } from "@/TestData/fakeData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { csStatusMap } from "@/lib/status";
-import { IconButton } from "@radix-ui/themes";
 import clsx from "clsx";
 import { motion, useAnimate } from "framer-motion";
 import { Maximize2, Minimize2 } from "lucide-react";
@@ -15,6 +14,7 @@ import { Draggable } from "react-beautiful-dnd";
 import { useTranslation } from "react-i18next";
 import { ResponsiveLine } from "@nivo/line";
 import { createPortal } from "react-dom";
+import { IconButton } from "@radix-ui/themes";
 type CustomerBalanceGraphProps = {
   customer: CustomerInfo;
   openGraph: boolean;
@@ -358,28 +358,28 @@ export const CustomerDialog: React.FC<CustommerDialogProps> = React.memo(
               className={clsx(
                 "fixed inset-0 z-200 flex items-center justify-center"
               )}
-              onClick={(e) => {
-                e.stopPropagation();
+              onClick={() => {
                 setOpen(false);
               }}
             >
-              <Card ref={scope} className="overflow-hidden">
+              <Card ref={scope} className="overflow-hidden z-201" onClick={(e)=>e.stopPropagation()}>
                 <motion.div
                   initial={{
-                    maxHeight:50,
+                    maxHeight:60,
                   }}
                   animate={{
                     maxHeight: 80,
                   }}
                   ref={headerRef}
-                  className="w-full flex flex-row items-center justify-between pr-6 flex-nowrap overflow-hidden"
+                  className="w-full flex flex-row items-center justify-between pr-2 flex-nowrap overflow-hidden"
                 >
-                  <CardHeader className="flex-1">
+                  <CardHeader className="flex-1 p-2">
                     <CardTitle>{customer.customerName}</CardTitle>
                   </CardHeader>
                   <IconButton
                     variant="ghost"
                     radius="full"
+                    className="hover:bg-indigo-100 w-4 h-4 rounded-full block "
                     size={"1"}
                     onClick={() => setOpen((pre) => !pre)}
                   >
@@ -387,7 +387,7 @@ export const CustomerDialog: React.FC<CustommerDialogProps> = React.memo(
                   </IconButton>
                 </motion.div>
 
-                <CardContent>
+                <CardContent className="p-2">
                   <div className={clsx("w-full flex")}>
                     <label className="w-[80px] text-sm font-semibold text-zinc-900/90 flex-grow-0 flex-shrink-0">
                       {t("customerName") + t(": ")}
