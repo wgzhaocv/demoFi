@@ -6,6 +6,27 @@ export const faker = new Faker({
   locale: [base, en],
 });
 
+export const mainAccount = (new Array(12)).fill(1).map((_,i)=>{
+  return {
+    month:i+1,
+    balance: faker.number.int({ min: 1, max: 2000 }),
+  }
+});
+
+export const fxBalance = (new Array(12)).fill(1).map((_,i)=>{
+  return {
+    month:i+1,
+    balance: faker.number.int({ min: 1, max: 2000 }),
+  }
+});
+
+export const boBalance = (new Array(12)).fill(1).map((_,i)=>{
+  return {
+    month:i+1,
+    balance: faker.number.int({ min: 1, max: 2000 }),
+  }
+});
+
 export type CustomerSubaccount = [
   {
     customerID: string;

@@ -1,4 +1,9 @@
-import { CustomerInfo } from "@/TestData/fakeData";
+import {
+  CustomerInfo,
+  // boBalance,
+  // fxBalance,
+  // mainAccount,
+} from "@/TestData/fakeData";
 import { csStatusMap } from "@/lib/status";
 import { IconButton } from "@radix-ui/themes";
 import clsx from "clsx";
@@ -7,6 +12,26 @@ import { Maximize2 } from "lucide-react";
 import React from "react";
 import { Draggable } from "react-beautiful-dnd";
 import { useTranslation } from "react-i18next";
+
+// type CustomerBalanceGraphProps = {
+//   customer: CustomerInfo;
+// };
+
+// const CustomerBalanceGraph= React.memo(
+//   ({ customer }: CustomerBalanceGraphProps) => {
+//     const total = mainAccount.map((data, i) => {
+//       return {
+//         ...data,
+//         balance: data.balance + fxBalance[i].balance + boBalance[i].balance,
+//       };
+//     });
+
+//     return <div className="grid grid-cols-3 gap-4">
+      
+      
+//     </div>;
+//   }
+// );
 
 type CustommerCardSimpleProps = {
   customer: CustomerInfo;
