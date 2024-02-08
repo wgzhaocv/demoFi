@@ -122,7 +122,7 @@ const CustomerServiceHistory = React.memo(
       "処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析";
     return (
       <div className="h-full flex flex-col justify-between ">
-        <div className="h-[fit-content] w-[fit-content] flex flex-col border-b border-zinc-400/90">
+        <div className="h-[fit-content] min-w-[850px] flex flex-col border-b border-zinc-400/90">
           <ReviewHeader
             name={cusutomerServiceSummary?.customerServiceId ?? ""}
             isCs
@@ -165,21 +165,60 @@ const CustomerServiceHistory = React.memo(
 type CustomerReviewDetailProps = { customerInfo?: CustomerInfo };
 
 const CustomerReviewDetail = React.memo(
-  ({ customerInfo }: CustomerReviewDetailProps) => {
+  React.forwardRef<
+    { scrollIntoView: (dep: string) => void },
+    CustomerReviewDetailProps
+  >(({ customerInfo }: CustomerReviewDetailProps, ref) => {
+    const refA = React.useRef<HTMLDivElement>(null);
+    const refB = React.useRef<HTMLDivElement>(null);
+    const refC = React.useRef<HTMLDivElement>(null);
+    const refD = React.useRef<HTMLDivElement>(null);
+    const refE = React.useRef<HTMLDivElement>(null);
+
+    const refMap = {
+      A: refA,
+      B: refB,
+      C: refC,
+      D: refD,
+      E: refE,
+    };
+
+    const depScrollIntoView = React.useCallback((dep: string) => {
+      const ref = refMap[dep as keyof typeof refMap];
+      if (ref && ref.current) {
+        ref.current.scrollIntoView({
+          behavior: "smooth",
+        });
+
+        ref.current.classList.add("bg-indigo-200/60");
+        setTimeout(() => {
+          ref.current?.classList.remove("bg-indigo-200/60");
+        }, 1000);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    React.useImperativeHandle(ref, () => ({
+      scrollIntoView: depScrollIntoView,
+    }));
+
     const { t } = useTranslation();
     const text =
       "取引可能前ステータスの顧客は前に気になるステータスを記入（該当顧客の審査フロー追跡など）\n取引可能な顧客は取引履歴をリストする";
     return (
       <div className="w-full h-full flex flex-col justify-between items-center">
         <ReviewHeader name={customerInfo?.customerName ?? ""} />
-        <div className="w-full flex-grow border-b border-zinc-400/90">
+        <div className="w-full min-h-[200px] flex-grow border-b border-zinc-400/90">
           <pre className="h-full">{text}</pre>
         </div>
         <div className="w-full h-[200px] flex-shrink-0 flex-grow-0 p-1">
           <div className="font-semibold">{t("Csutomer Evaluation") + ":"}</div>
           <div>{t("Data Analysis Results")}</div>
           {customerInfo && customerInfo.review.reviwA && (
-            <div className="flex flex-nowrap">
+            <div
+              ref={refA}
+              className="flex flex-nowrap transition-colors duration-500"
+            >
               <pre className="flex items-center justify-start flex-grow-0 flex-shrink-0">
                 {t("reviwA") + t(": ")}
               </pre>
@@ -187,7 +226,10 @@ const CustomerReviewDetail = React.memo(
             </div>
           )}
           {customerInfo && customerInfo.review.reviwB && (
-            <div className="flex flex-nowrap">
+            <div
+              ref={refB}
+              className="flex flex-nowrap transition-colors duration-500"
+            >
               <div className="flex items-center justify-start flex-grow-0 flex-shrink-0">
                 {t("reviwB") + t(": ")}
               </div>
@@ -195,7 +237,10 @@ const CustomerReviewDetail = React.memo(
             </div>
           )}
           {customerInfo && customerInfo.review.reviwC && (
-            <div className="flex flex-nowrap">
+            <div
+              ref={refC}
+              className="flex flex-nowrap transition-colors duration-500"
+            >
               <pre className="flex items-center justify-start flex-grow-0 flex-shrink-0">
                 {t("reviwC") + t(": ")}
               </pre>
@@ -203,7 +248,10 @@ const CustomerReviewDetail = React.memo(
             </div>
           )}
           {customerInfo && customerInfo.review.reviwD && (
-            <div className="flex flex-nowrap">
+            <div
+              ref={refD}
+              className="flex flex-nowrap transition-colors duration-500"
+            >
               <pre className="flex items-center justify-start flex-grow-0 flex-shrink-0">
                 {t("reviwD") + t(": ")}
               </pre>
@@ -211,7 +259,10 @@ const CustomerReviewDetail = React.memo(
             </div>
           )}
           {customerInfo && customerInfo.review.reviwE && (
-            <div className="flex flex-nowrap">
+            <div
+              ref={refE}
+              className="flex flex-nowrap transition-colors duration-500"
+            >
               <pre className="flex items-center justify-start flex-grow-0 flex-shrink-0">
                 {t("reviwE") + t(": ")}
               </pre>
@@ -226,33 +277,38 @@ const CustomerReviewDetail = React.memo(
         </div>
       </div>
     );
-  }
+  })
 );
 
 export const CustomerReview = React.memo(() => {
-  const { customerInfo, customerServiceHistory, setCustomerInfo } =
-    useCustomerServiceList();
+  const {
+    customerInfo,
+    customerServiceHistory,
+    setCustomerInfo,
+    highlightDep,
+    // clearHighlightDep,
+  } = useCustomerServiceList();
   const ref = React.useRef<HTMLDivElement>(null);
   const lastCustomerAndServiceHistory = React.useRef<{
     customerInfo?: CustomerInfo;
     customerServiceHistory?: CustomerServiceHistoryInfo;
+    dep?: string;
   }>({});
+  const customerDetailRef = React.useRef<{
+    scrollIntoView: (dep: string) => void;
+  }>(null);
 
   useEffect(() => {
-    if (
-      lastCustomerAndServiceHistory.current.customerInfo !== customerInfo ||
-      lastCustomerAndServiceHistory.current.customerServiceHistory !==
-        customerServiceHistory
-    ) {
+    if (lastCustomerAndServiceHistory.current.dep !== highlightDep) {
       lastCustomerAndServiceHistory.current = {
-        customerInfo,
-        customerServiceHistory,
+        dep: highlightDep,
       };
-      ref.current?.scrollIntoView({
-        behavior: "smooth",
-      });
+
+      if (highlightDep) {
+        customerDetailRef.current?.scrollIntoView(highlightDep);
+      }
     }
-  }, [customerInfo, customerServiceHistory]);
+  }, [customerInfo, customerServiceHistory, highlightDep]);
   const [open, setOpen] = React.useState<-1 | 0 | 1>(0);
   const viewref = React.useRef(null);
   const isInView = useInView(viewref);
@@ -311,7 +367,10 @@ export const CustomerReview = React.memo(() => {
         </Button>
       </div>
       <div className="flex-grow overflow-auto">
-        <CustomerReviewDetail customerInfo={customerInfo} />
+        <CustomerReviewDetail
+          ref={customerDetailRef}
+          customerInfo={customerInfo}
+        />
       </div>
     </section>
   );

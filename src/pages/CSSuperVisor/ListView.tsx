@@ -51,6 +51,8 @@ import { useCustomContextMenu } from "@/components/providers/CustomerContextMenu
 import { CustommerCardSimple } from "../CustomerCard/customerCardSimple";
 import { useCheckedCustomers } from "@/components/providers/checkedCustomers";
 import { Checkbox } from "@/components/ui/checkbox";
+import { dep, depkana } from "./depatment";
+import { useMode } from "@/components/providers/Mode";
 
 const calculateTargetIndex = (
   mousePosition: { x: number; y: number },
@@ -86,7 +88,6 @@ const CustomerServiceList = ({
     { name: "telephone", deletable: false, link: false },
     { name: "status", deletable: false, link: false },
   ]);
-
   const [customerGroup, setCustomerGroup] =
     React.useState<CustomerService[]>(groupedCustomers);
 
@@ -94,7 +95,7 @@ const CustomerServiceList = ({
 
   return (
     <motion.div className="flex flex-col" layoutRoot>
-      <div className="cs-row w-full justify-center sticky top-0 bg-white text-lg z-30">
+      <div className="cs-row justify-center min-w-[200px] sticky top-0 bg-white text-lg z-30">
         <Text size={"4"} weight={"bold"}>
           {t("Customer Service List")}
         </Text>
@@ -368,8 +369,6 @@ const CustomerList = React.memo(
       allStatusId[0]
     );
 
-    const cols = useDispItems((state) => state.displayList);
-
     const handleCustomerClick = React.useCallback((customer: CustomerInfo) => {
       return (e: React.MouseEvent) => {
         if (e.ctrlKey || e.metaKey) {
@@ -389,7 +388,7 @@ const CustomerList = React.memo(
     }, []);
 
     const { t } = useTranslation();
-    const costomer = useCustomContextMenu((state) => state.customer);
+    const rightClickCostomer = useCustomContextMenu((state) => state.customer);
     const checkedCustomers = useCheckedCustomers((state) => state.customers);
     const clearCustomers = useCheckedCustomers(
       (state) => state.removeAllCustomers
@@ -412,6 +411,9 @@ const CustomerList = React.memo(
       [t]
     );
 
+    const mode = useMode((state) => state.mode);
+    const isListMode = mode === "listMode";
+
     const memoizedHeaderRow = React.useMemo(
       () => (
         <ul
@@ -420,10 +422,14 @@ const CustomerList = React.memo(
         >
           <AnimatePresence>
             {allStatusTabs.map((status) => (
-              <Droppable droppableId={"status:" + status} key={status}>
+              <Droppable
+                droppableId={"status:" + status}
+                key={status}
+                isDropDisabled={!isListMode}
+              >
                 {(provided) => (
                   <motion.li
-                    style={{ width: 150 }}
+                    style={{ width: isListMode ? 150 : 250 }}
                     exit={{ width: 0 }}
                     className={clsx("cs-cell overflow-visible")}
                     ref={provided.innerRef}
@@ -432,10 +438,11 @@ const CustomerList = React.memo(
                   >
                     <div
                       className={clsx(
-                        "w-full h-full rounded-lg relative text-wrap text-center text-zinc-800 flex items-center leading-4 px-2 hover:bg-indigo-300/10"
+                        "w-full h-full rounded-lg relative text-wrap text-center text-zinc-800 flex items-center leading-4 px-2",
+                        isListMode && "hover:bg-indigo-300/10"
                       )}
                     >
-                      {selectedStatus === status && (
+                      {isListMode && selectedStatus === status && (
                         <motion.div
                           layoutId="statusTabBg"
                           className={
@@ -468,7 +475,14 @@ const CustomerList = React.memo(
           </AnimatePresence>
         </ul>
       ),
-      [allStatusTabs, droppableListRef, selectedStatus, setAllStatusTabs, t]
+      [
+        allStatusTabs,
+        droppableListRef,
+        selectedStatus,
+        setAllStatusTabs,
+        t,
+        isListMode,
+      ]
     );
 
     const checkAllCustomers = React.useCallback(
@@ -477,9 +491,67 @@ const CustomerList = React.memo(
     );
 
     return (
-      <div className="w-[fit-content]">
+      <div>
         {memoizedTitleRow}
         {memoizedHeaderRow}
+        {isListMode && (
+          <ListModeCustomers
+            checkedCustomers={checkedCustomers}
+            customers={customers}
+            selectedStatus={selectedStatus}
+            checkAllCustomers={checkAllCustomers}
+            clearCustomers={clearCustomers}
+            handleCustomerClick={handleCustomerClick}
+            selectedCustomers={selectedCustomers}
+            rightClickCostomer={rightClickCostomer}
+          />
+        )}
+      </div>
+    );
+  }
+);
+
+// type BlockModeCustomerListProps = {
+//   customerLists: Record<CsStatusId, CustomerInfo[]>;
+//   setCustomerLists: React.Dispatch<
+//     React.SetStateAction<Record<CsStatusId, CustomerInfo[]>>
+//   >;
+//   customerListTo: CustomerInfo[];
+//   setCustomerListTo: React.Dispatch<React.SetStateAction<CustomerInfo[]>>;
+// };
+
+// const BlockModeCustomerList = React.memo(() => {
+//   return <div></div>;
+// });
+
+type ListModeCustomersProps = {
+  checkedCustomers: CustomerInfo[];
+  customers: Record<CsStatusId, CustomerInfo[]>;
+  selectedStatus: CsStatusId;
+  checkAllCustomers: () => void;
+  clearCustomers: () => void;
+  handleCustomerClick: (
+    customer: CustomerInfo
+  ) => (e: React.MouseEvent) => void;
+  selectedCustomers: CustomerInfo[];
+  rightClickCostomer: CustomerInfo | undefined;
+};
+
+const ListModeCustomers = React.memo(
+  ({
+    checkedCustomers,
+    customers,
+    selectedStatus,
+    checkAllCustomers,
+    clearCustomers,
+    handleCustomerClick,
+    selectedCustomers,
+    rightClickCostomer,
+  }: ListModeCustomersProps) => {
+    const cols = useDispItems((state) => state.displayList);
+
+    return (
+      <>
         <CustomerRow
           asTitle
           cols={cols}
@@ -502,7 +574,7 @@ const CustomerList = React.memo(
                   index={i}
                   handleCustomerClick={handleCustomerClick}
                   selected={selectedCustomers.includes(customer)}
-                  rightClicked={costomer === customer}
+                  rightClicked={rightClickCostomer === customer}
                   checked={checkedCustomers.includes(customer)}
                 />
               ))}
@@ -510,7 +582,7 @@ const CustomerList = React.memo(
             </motion.div>
           )}
         </Droppable>
-      </div>
+      </>
     );
   }
 );
@@ -689,7 +761,6 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
       props.customer.review.reviwD,
       props.customer.review.reviwE,
     ];
-    const kana = ["あ", "い", "う", "え", "お"];
 
     return props.cols.map((col) => (
       <motion.div
@@ -739,7 +810,7 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
                       {review ? (
                         <Link asChild>
                           <LinkRrd
-                            to={`?customer=${props.customer.customerID}#customerReview`}
+                            to={`?customer=${props.customer.customerID}&dep=${dep[i]}#customerReview`}
                           >
                             <span
                               key={i}
@@ -747,7 +818,7 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
                                 "text-xs text-indigo-600 underline font-semibold"
                               )}
                             >
-                              {kana[i]}
+                              {depkana[i]}
                             </span>
                           </LinkRrd>
                         </Link>
@@ -758,7 +829,7 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
                             "text-xs text-zinc-600 font-semibold"
                           )}
                         >
-                          {kana[i]}
+                          {depkana[i]}
                         </span>
                       )}
                     </HoverCardTrigger>
@@ -1100,7 +1171,7 @@ export const CSListView = React.memo(() => {
   );
 
   const location = useLocation();
-  const { setCustomerInfo, setCustomerServiceHistory } =
+  const { setCustomerInfo, setCustomerServiceHistory, setHightlightDep } =
     useCustomerServiceList();
   const customerMap = React.useMemo(() => {
     const customerLocalMap: Record<string, CustomerInfo> = {};
@@ -1139,6 +1210,10 @@ export const CSListView = React.memo(() => {
           const [key, value] = s.split("=");
           searchParams[key] = value;
         });
+
+      if (searchParams.dep) {
+        setHightlightDep(searchParams.dep);
+      }
       if (searchParams.customer) {
         const customer = customerMap[searchParams.customer];
         if (customer) {
@@ -1180,7 +1255,7 @@ export const CSListView = React.memo(() => {
             width: open === -1 ? "100px" : open === 1 ? "85vw" : "auto",
           }}
         >
-          <div className="w-[fit-content]">
+          <div className="">
             <CustomerServiceList groupedCustomers={leftList} />
           </div>
         </motion.section>
@@ -1210,7 +1285,7 @@ export const CSListView = React.memo(() => {
             <ChevronsRight className="w-5 h-5 mx-auto text-zinc-900/50" />
           </Button>
         </section>
-        <motion.section className="h-full overflow-auto">
+        <motion.section className="h-full flex-1 overflow-auto">
           <CustomerList
             customers={rightList}
             selectedCustomers={selectedCustomers}

@@ -4,7 +4,10 @@ import { create } from "zustand";
 export interface CSListState {
   customerServiceHistory?: CustomerServiceHistoryInfo;
   customerInfo?: CustomerInfo;
+  highlightDep: string;
   setCustomerInfo: (customerInfo: CustomerInfo) => void;
+  setHightlightDep: (dep: string) => void;
+  clearHighlightDep: () => void;
   setCustomerServiceHistory: (
     customerServiceHistory: CustomerServiceHistoryInfo
   ) => void;
@@ -13,6 +16,7 @@ export interface CSListState {
 export const useCustomerServiceList = create<CSListState>((set) => ({
   customerServiceHistory: undefined,
   customerInfo: undefined,
+  highlightDep: "",
   setCustomerInfo: (customerInfo: CustomerInfo) => {
     set({ customerInfo });
   },
@@ -20,5 +24,11 @@ export const useCustomerServiceList = create<CSListState>((set) => ({
     customerServiceHistory: CustomerServiceHistoryInfo
   ) => {
     set({ customerServiceHistory });
+  },
+  setHightlightDep: (dep: string) => {
+    set({ highlightDep: dep });
+  },
+  clearHighlightDep: () => {
+    set({ highlightDep: "" });
   },
 }));
