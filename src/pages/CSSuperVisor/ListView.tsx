@@ -492,7 +492,12 @@ const CustomerList = React.memo(
     );
 
     return (
-      <div className={clsx("",!isListMode&&"flex flex-col items-stretch w-[fit-content]")}>
+      <div
+        className={clsx(
+          "",
+          !isListMode && "flex flex-col items-stretch w-[fit-content]"
+        )}
+      >
         {memoizedTitleRow}
         {memoizedHeaderRow}
         {isListMode && (
@@ -535,7 +540,7 @@ const BlockModeCustomerList = React.memo(
                     {customerLists[status].map((customer, index) => {
                       return (
                         <CustommerCardSimple
-                        key={customer.customerID}
+                          key={customer.customerID}
                           customer={customer}
                           index={index}
                         />

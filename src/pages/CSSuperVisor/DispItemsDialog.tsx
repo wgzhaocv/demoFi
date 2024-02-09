@@ -163,7 +163,7 @@ export const DispItemDialog = () => {
           <DialogHeader>
             <DialogTitle>{t("Select Display Items")}</DialogTitle>
           </DialogHeader>
-          <div className="flex gap-3">
+          <div className="flex gap-3 select-none">
             <Droppable droppableId="left">
               {(provided) => (
                 <div
