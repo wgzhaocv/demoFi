@@ -402,7 +402,7 @@ const CustomerList = React.memo(
 
     const memoizedTitleRow = React.useMemo(
       () => (
-        <div className="cs-row w-full justify-center sticky top-0 bg-white text-lg z-30">
+        <div className="cs-row w-full justify-center min-w-[200px] sticky top-0 bg-white text-lg z-30">
           <Text size={"4"} weight={"bold"}>
             {t("Customer List")}
           </Text>
@@ -438,8 +438,9 @@ const CustomerList = React.memo(
                   >
                     <div
                       className={clsx(
-                        "w-full h-full rounded-lg relative text-wrap text-center text-zinc-800 flex items-center leading-4 px-2",
-                        isListMode && "hover:bg-indigo-300/10"
+                        "w-full h-full rounded-lg relative text-wrap text-center cursor-default text-zinc-800 flex items-center leading-4 px-2",
+                        isListMode && "hover:bg-indigo-300/10",
+                        !isListMode && "justify-center"
                       )}
                     >
                       {isListMode && selectedStatus === status && (
@@ -491,7 +492,7 @@ const CustomerList = React.memo(
     );
 
     return (
-      <div>
+      <div className={clsx("",!isListMode&&"flex flex-col items-stretch w-[fit-content]")}>
         {memoizedTitleRow}
         {memoizedHeaderRow}
         {isListMode && (
@@ -506,23 +507,51 @@ const CustomerList = React.memo(
             rightClickCostomer={rightClickCostomer}
           />
         )}
+        {!isListMode && <BlockModeCustomerList customerLists={customers} />}
       </div>
     );
   }
 );
 
-// type BlockModeCustomerListProps = {
-//   customerLists: Record<CsStatusId, CustomerInfo[]>;
-//   setCustomerLists: React.Dispatch<
-//     React.SetStateAction<Record<CsStatusId, CustomerInfo[]>>
-//   >;
-//   customerListTo: CustomerInfo[];
-//   setCustomerListTo: React.Dispatch<React.SetStateAction<CustomerInfo[]>>;
-// };
+type BlockModeCustomerListProps = {
+  customerLists: Record<CsStatusId, CustomerInfo[]>;
+};
 
-// const BlockModeCustomerList = React.memo(() => {
-//   return <div></div>;
-// });
+const BlockModeCustomerList = React.memo(
+  ({ customerLists }: BlockModeCustomerListProps) => {
+    return (
+      <div className="grid grid-cols-statusrows h-full">
+        {allStatusId.map((status) => {
+          return (
+            <Droppable key={status} droppableId={status}>
+              {(provided) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  key={status}
+                  className="h-full px-2 flex-grow-0 flex-shrink-0 "
+                >
+                  <div className="h-full flex flex-col items-center gap-3 p-2 bg-indigo-50 flex-grow-0 flex-shrink-0 ">
+                    {customerLists[status].map((customer, index) => {
+                      return (
+                        <CustommerCardSimple
+                        key={customer.customerID}
+                          customer={customer}
+                          index={index}
+                        />
+                      );
+                    })}
+                  </div>
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          );
+        })}
+      </div>
+    );
+  }
+);
 
 type ListModeCustomersProps = {
   checkedCustomers: CustomerInfo[];
