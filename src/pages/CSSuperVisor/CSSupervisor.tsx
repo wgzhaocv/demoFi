@@ -1,5 +1,5 @@
 import { I18nButton } from "@/components/i18nBtn";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from "react-i18next";
 import { CSListView } from "./ListView";
 import React from "react";
@@ -13,6 +13,7 @@ import { DownloadButton } from "./DownloadButton";
 import { useMode } from "@/components/providers/Mode";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@radix-ui/react-dropdown-menu";
+import { BlockView } from "./BlockView";
 
 const CSSuperVisor = () => {
   const { t } = useTranslation();
@@ -33,6 +34,10 @@ const CSSuperVisor = () => {
           <DispItemDialog />
           <DiffDialog />
           <DownloadButton />
+          <TabsList>
+            <TabsTrigger value="listMode">{t("listMode")}</TabsTrigger>
+            <TabsTrigger value="blockMode">{t("blockMode")}</TabsTrigger>
+          </TabsList>
           <div className="bg-white mx-1">
             <RadioGroup
               value={mode}
@@ -61,9 +66,9 @@ const CSSuperVisor = () => {
           <CSListView />
           <CustomerReview />
         </TabsContent>
-        {/* <TabsContent value="blockMode">
+        <TabsContent value="blockMode">
           <BlockView />
-        </TabsContent> */}
+        </TabsContent>
       </Tabs>
     </div>
   );
