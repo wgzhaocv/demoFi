@@ -191,7 +191,7 @@ export const CustommerCardSimple: React.FC<CustommerCardSimpleProps> =
                   </IconButton>
                 </div>
               )}
-              <div ref={ref} className={clsx("w-full flex")}>
+              <div ref={ref} className={clsx("w-full flex overflow-hidden")}>
                 <label className="w-[80px] text-sm font-semibold text-zinc-900/90 flex-grow-0 flex-shrink-0">
                   {t("customerName") + t(": ")}
                 </label>
@@ -203,7 +203,9 @@ export const CustommerCardSimple: React.FC<CustommerCardSimpleProps> =
                 <label className="w-[80px]  text-sm font-semibold text-zinc-900/90 flex-grow-0 flex-shrink-0">
                   {t("telephone") + t(": ")}
                 </label>
-                <div className="flex-1 text-nowrap ">{customer.telephone}</div>
+                <div className="flex-1 text-nowrap overflow-hidden">
+                  {customer.telephone}
+                </div>
               </div>
               <div className="w-full flex">
                 <label className="w-[80px] text-sm font-semibold text-zinc-900/90 flex-grow-0 flex-shrink-0">
@@ -362,10 +364,14 @@ export const CustomerDialog: React.FC<CustommerDialogProps> = React.memo(
                 setOpen(false);
               }}
             >
-              <Card ref={scope} className="overflow-hidden z-201" onClick={(e)=>e.stopPropagation()}>
+              <Card
+                ref={scope}
+                className="overflow-hidden z-201"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <motion.div
                   initial={{
-                    maxHeight:60,
+                    maxHeight: 60,
                   }}
                   animate={{
                     maxHeight: 80,

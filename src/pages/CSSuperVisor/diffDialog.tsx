@@ -62,9 +62,6 @@ export const DiffDialog = () => {
   const [customerDiff, setCustomerDiff] = React.useState<CustomerDiff[]>([]);
   const contentRef = React.useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    console.log(customerListFrom, customerListTo);
-  }, [customerListFrom, customerListTo]);
   const customerFromMap = customerListFrom.reduce((acc, cur) => {
     acc[cur.customerID] = cur;
     return acc;

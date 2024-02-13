@@ -96,8 +96,6 @@ export const DispItemDialog = () => {
   };
 
   const handleDragEnd: OnDragEndResponder = (result) => {
-    console.log(result);
-
     const index = selectedItems.list.findIndex(
       (item) => item.name === result.draggableId
     );

@@ -53,6 +53,7 @@ import { useCheckedCustomers } from "@/components/providers/checkedCustomers";
 import { Checkbox } from "@/components/ui/checkbox";
 import { dep, depkana } from "./depatment";
 import { useMode } from "@/components/providers/Mode";
+import { useMultiSelectedCustomers } from "@/components/providers/multiSelectedCustomers";
 
 const calculateTargetIndex = (
   mousePosition: { x: number; y: number },
@@ -93,6 +94,15 @@ const CustomerServiceList = ({
 
   useEffect(() => setCustomerGroup(groupedCustomers), [groupedCustomers]);
 
+  const indexes = customerGroup.reduce(
+    (pre, cur) => {
+      const lastlength = pre.at(-1) as number;
+      pre.push(cur.customers.length + lastlength);
+      return pre;
+    },
+    [0] as number[]
+  );
+
   return (
     <motion.div className="flex flex-col" layoutRoot>
       <div className="cs-row justify-center min-w-[200px] sticky top-0 bg-white text-lg z-30">
@@ -114,7 +124,7 @@ const CustomerServiceList = ({
                 customerService={group.customerService}
                 customers={group.customers}
                 cols={cols}
-                i={index}
+                i={indexes[index]}
               />
             ))}
             {provided.placeholder}
@@ -144,50 +154,22 @@ const CustomerServiceGroup = ({
   i,
 }: CustomerServiceGroupProps) => {
   const [open, setOpen] = React.useState(true);
-  const ref = React.useRef<HTMLDivElement>(null);
-  const [firstCustomer, ...restCustomers] = customers;
-  useEffect(() => {
-    if (ref.current) {
-      if (open) {
-        ref.current.style.maxHeight = ref.current.scrollHeight + "px";
-      } else {
-        ref.current.style.maxHeight = "0";
-      }
-    }
-  }, [open, restCustomers.length]);
-
   return (
-    <Draggable draggableId={customerService} index={i} isDragDisabled>
-      {(provided) => (
-        <div
-          ref={provided.innerRef}
-          className={clsx("w-full flex flex-col")}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-        >
+    <>
+      {customers.map((customer, idx) => {
+        return (
           <CustomerServiceRow
-            cutomer={firstCustomer}
-            csName={customerService}
+            key={customer.customerID}
+            cutomer={customer}
+            csName={idx == 0 ? customerService : undefined}
             cols={cols}
             setOpen={setOpen}
             open={open}
+            index={i + idx}
           />
-          <div
-            ref={ref}
-            className="flex flex-col overflow-hidden transition-[max-height] duration-200 ease-out"
-          >
-            {restCustomers.map((customer) => (
-              <CustomerServiceRow
-                key={customer.customerID}
-                cutomer={customer}
-                cols={cols}
-                setOpen={setOpen}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-    </Draggable>
+        );
+      })}
+    </>
   );
 };
 
@@ -200,7 +182,7 @@ type OptionLinkProps = React.ComponentPropsWithoutRef<"a"> & {
 const OptionLink = React.memo(
   ({ isLink = false, children, href = "/" }: OptionLinkProps) => {
     return isLink ? (
-      <Link href={href} target="_blank">
+      <Link href={href ?? "/"} target="_blank">
         {children}
       </Link>
     ) : (
@@ -220,12 +202,19 @@ type CustomerServiceRowProps =
       csName?: string;
       cols: ColsAttr[];
       setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-      open?: boolean;
+      open: boolean;
+      index: number;
     };
 
 const CustomerServiceRow = React.memo((props: CustomerServiceRowProps) => {
   const { t } = useTranslation();
   const { itemWidth } = useCSItemWStore();
+  const selectedCustomers = useMultiSelectedCustomers(
+    (state) => state.selectedCustomers
+  );
+  const selectCustomerForDrag = useMultiSelectedCustomers(
+    (state) => state.selectLeft
+  );
 
   if ("asTitle" in props) {
     return (
@@ -276,81 +265,108 @@ const CustomerServiceRow = React.memo((props: CustomerServiceRowProps) => {
     [props.setOpen]
   );
 
+  const shouldCollapse = props.open === false && !props.csName;
+
+  useEffect(() => {
+    console.log(props.index);
+  }, [props.index]);
   return (
-    <motion.div className={"cs-row"} layoutRoot>
-      <AnimatePresence>
-        {props.cols.map((col, i) => (
-          <React.Fragment key={col.name}>
-            <motion.div
-              layout
-              style={{ width: itemWidth[col.name] }}
-              exit={{ width: 0 }}
-              className="cs-cell text-wrap leading-4 relative first:pr-6"
-            >
-              {i === 0 ? (
-                <>
-                  <Link asChild>
-                    <LinkRrd
-                      to={`?customerService=${props.csName}#customerReview`}
-                    >
-                      <Text className="break-all">{props.csName}</Text>
-                    </LinkRrd>
-                  </Link>
-                  {props.csName && (
-                    <motion.div
-                      className="ml-2 flex items-center absolute right-1 top-[50%] translateTocenter"
-                      animate={{
-                        rotate: props.open === false ? "180deg" : "0",
-                      }}
-                      transition={{ type: "just" }}
-                    >
-                      <IconButton
-                        className="transition-transform flex items-center justify-center"
-                        onClick={collapse}
-                        variant="ghost"
-                        radius="full"
-                        size={"1"}
-                      >
-                        <span>
-                          <ChevronDown className="w-3 h-3" />
-                        </span>
-                      </IconButton>
-                    </motion.div>
-                  )}
-                </>
-              ) : col.name === "status" ? (
-                <Tooltip
-                  content={t(
-                    csStatusMap[props.cutomer[col.name] as CsStatusId]
-                  )}
-                >
-                  <Text>
-                    {t(csStatusMap[props.cutomer[col.name] as CsStatusId])}
-                  </Text>
-                </Tooltip>
-              ) : col.link ? (
-                <Link asChild>
-                  <LinkRrd
-                    to={`?customer=${props.cutomer.customerID}#customerReview`}
+    <Draggable draggableId={props.cutomer.customerID} index={props.index}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+        >
+          <motion.div
+            animate={
+              shouldCollapse
+                ? {
+                    height: 0,
+                    borderBottomWidth: 0,
+                  }
+                : {}
+            }
+            className={"cs-row overflow-hidden"}
+            layout
+            layoutRoot
+          >
+            <AnimatePresence>
+              {props.cols.map((col, i) => (
+                <React.Fragment key={col.name}>
+                  <motion.div
+                    layout
+                    style={{ width: itemWidth[col.name] }}
+                    exit={{ width: 0 }}
+                    className="cs-cell text-wrap leading-4 relative first:pr-6"
                   >
-                    <Text>{props.cutomer[col.name]}</Text>
-                  </LinkRrd>
-                </Link>
-              ) : (
-                <Text>{props.cutomer[col.name]}</Text>
-              )}
-            </motion.div>
-          </React.Fragment>
-        ))}
-      </AnimatePresence>
-    </motion.div>
+                    {i === 0 ? (
+                      <>
+                        <Link asChild>
+                          <LinkRrd
+                            to={`?customerService=${props.csName}#customerReview`}
+                          >
+                            <Text className="break-all">{props.csName}</Text>
+                          </LinkRrd>
+                        </Link>
+                        {props.csName && (
+                          <motion.div
+                            className="ml-2 flex items-center absolute right-1 top-[50%] translateTocenter"
+                            animate={{
+                              rotate: props.open === false ? "180deg" : "0",
+                            }}
+                            transition={{ type: "just" }}
+                          >
+                            <IconButton
+                              className="transition-transform flex items-center justify-center"
+                              onClick={collapse}
+                              variant="ghost"
+                              radius="full"
+                              size={"1"}
+                            >
+                              <span>
+                                <ChevronDown className="w-3 h-3" />
+                              </span>
+                            </IconButton>
+                          </motion.div>
+                        )}
+                      </>
+                    ) : col.name === "status" ? (
+                      <Tooltip
+                        content={t(
+                          csStatusMap[props.cutomer[col.name] as CsStatusId]
+                        )}
+                      >
+                        <Text>
+                          {t(
+                            csStatusMap[props.cutomer[col.name] as CsStatusId]
+                          )}
+                        </Text>
+                      </Tooltip>
+                    ) : col.link ? (
+                      <Link asChild>
+                        <LinkRrd
+                          to={`?customer=${props.cutomer.customerID}#customerReview`}
+                        >
+                          <Text>{props.cutomer[col.name]}</Text>
+                        </LinkRrd>
+                      </Link>
+                    ) : (
+                      <Text>{props.cutomer[col.name]}</Text>
+                    )}
+                  </motion.div>
+                </React.Fragment>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        </div>
+      )}
+    </Draggable>
   );
 });
 
 type CustomerListProps = {
   customers: Record<CsStatusId, CustomerInfo[]>;
-  selectedCustomers: CustomerInfo[];
-  setSelectedCustomers: React.Dispatch<React.SetStateAction<CustomerInfo[]>>;
   droppableListRef: React.RefObject<HTMLUListElement>;
   allStatusTabs: CsStatusId[];
   setAllStatusTabs: React.Dispatch<React.SetStateAction<CsStatusId[]>>;
@@ -359,8 +375,6 @@ type CustomerListProps = {
 const CustomerList = React.memo(
   ({
     customers,
-    selectedCustomers,
-    setSelectedCustomers,
     droppableListRef,
     allStatusTabs,
     setAllStatusTabs,
@@ -369,23 +383,13 @@ const CustomerList = React.memo(
       allStatusId[0]
     );
 
-    const handleCustomerClick = React.useCallback((customer: CustomerInfo) => {
-      return (e: React.MouseEvent) => {
-        if (e.ctrlKey || e.metaKey) {
-          setSelectedCustomers((pre) => {
-            if (pre.includes(customer))
-              return pre.filter((c) => c !== customer);
-            return [...pre, customer];
-          });
-        } else {
-          setSelectedCustomers((pre) => {
-            if (pre.includes(customer)) return [];
-            return [customer];
-          });
-        }
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const selectedCustomers = useMultiSelectedCustomers(
+      (state) => state.selectedCustomers
+    );
+
+    const setSelectedCustomers = useMultiSelectedCustomers(
+      (state) => state.selectRight
+    );
 
     const { t } = useTranslation();
     const rightClickCostomer = useCustomContextMenu((state) => state.customer);
@@ -507,7 +511,7 @@ const CustomerList = React.memo(
             selectedStatus={selectedStatus}
             checkAllCustomers={checkAllCustomers}
             clearCustomers={clearCustomers}
-            handleCustomerClick={handleCustomerClick}
+            handleCustomerClick={setSelectedCustomers}
             selectedCustomers={selectedCustomers}
             rightClickCostomer={rightClickCostomer}
           />
@@ -528,7 +532,7 @@ const BlockModeCustomerList = React.memo(
       <div className="grid grid-cols-statusrows h-full">
         {allStatusId.map((status) => {
           return (
-            <Droppable key={status} droppableId={status}>
+            <Droppable key={status} droppableId={"status:" + status}>
               {(provided) => (
                 <div
                   ref={provided.innerRef}
@@ -593,7 +597,7 @@ const ListModeCustomers = React.memo(
           checkAll={checkAllCustomers}
           uncheckAll={clearCustomers}
         />
-        <Droppable droppableId={"CustomerList"}>
+        <Droppable droppableId={"status:" + selectedStatus}>
           {(provided) => (
             <motion.div
               ref={provided.innerRef}
@@ -968,7 +972,6 @@ const CustomerRow = React.memo((props: CustomerRowprops) => {
       return { ...style, cursor };
     }
     const hoveringId = snapshot.draggingOver;
-    console.log(hoveringId, snapshot.dropAnimation);
     if (hoveringId?.startsWith("status:")) {
       return { ...style, transitionDuration: `0.001s`, opacity: 0, cursor };
     } else {
@@ -1092,9 +1095,9 @@ export const CSListView = React.memo(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leftList, rightList]);
 
-  const [selectedCustomers, setSelectedCustomers] = React.useState<
-    CustomerInfo[]
-  >([]);
+  // const [selectedCustomers, setSelectedCustomers] = React.useState<
+  //   CustomerInfo[]
+  // >([]);
 
   const { t } = useTranslation();
 
@@ -1111,9 +1114,41 @@ export const CSListView = React.memo(() => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  const selectedCustomers = useMultiSelectedCustomers(
+    (state) => state.selectedCustomers
+  );
+
   const handleDragEnd = React.useCallback(
     (result: DropResult) => {
       try {
+        console.log(result);
+
+        if (!result.destination) throw new Error("No destination");
+
+        const { index: srcIdx, droppableId: srcDroppableId } = result.source;
+        const { index: dstIdx, droppableId: dstDroppableId } =
+          result.destination;
+
+        if (
+          srcDroppableId === "CustomerServiceList" &&
+          dstDroppableId === "CustomerServiceList"
+        ) {
+        } else if (
+          srcDroppableId === "CustomerServiceList" &&
+          dstDroppableId.startsWith("status:")
+        ) {
+        } else if (
+          srcDroppableId.startsWith("status:") &&
+          dstDroppableId === "CustomerServiceList"
+        ) {
+        } else if (
+          srcDroppableId.startsWith("status:") &&
+          dstDroppableId.startsWith("status:")
+        ) {
+        } else {
+          throw new Error("Invalid destination");
+        }
+
         const droppableId = result.destination?.droppableId as string;
 
         if (!result.destination) return;
@@ -1152,7 +1187,6 @@ export const CSListView = React.memo(() => {
             ...c,
             status: newStatus,
           }));
-          console.log(">>>", newStatus, customerListMove, newCustomerListMove);
 
           if (newStatus !== status) {
             newRightList = {
@@ -1195,7 +1229,6 @@ export const CSListView = React.memo(() => {
             }`
           );
         }
-        setSelectedCustomers([]);
       } catch (error) {
         if (error instanceof Error) toast.error(error.message);
       }
@@ -1322,8 +1355,6 @@ export const CSListView = React.memo(() => {
         <motion.section className="h-full flex-1 overflow-auto">
           <CustomerList
             customers={rightList}
-            selectedCustomers={selectedCustomers}
-            setSelectedCustomers={setSelectedCustomers}
             droppableListRef={droppableListRef}
             allStatusTabs={allStatusTabs}
             setAllStatusTabs={setAllStatusTabs}

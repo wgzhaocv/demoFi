@@ -64,7 +64,6 @@ const CustomerServiceHistoryRow = React.memo(
         </div>
       );
     }
-    console.log(props.customerReview.customer.customerID, props.selected);
 
     return (
       <div
@@ -116,7 +115,6 @@ const CustomerServiceHistory = React.memo(
       { name: "customersReview" },
     ]);
     const { t } = useTranslation();
-    console.log(customerInfo);
 
     const text =
       "処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析\n処理時間、顧客数、処理満足度など分析データのBIデータ分析";
