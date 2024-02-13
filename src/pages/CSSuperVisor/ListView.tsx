@@ -277,6 +277,9 @@ const CustomerServiceRow = React.memo((props: CustomerServiceRowProps) => {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
+          className={clsx("",selectedCustomers.includes(props.cutomer) && "bg-indigo-300/30")}
+          style={{opacity: snapshot.isDragging ? 0.5 : 1}}
+          onClick={selectCustomerForDrag(props.cutomer)}
         >
           <motion.div
             animate={
@@ -1125,29 +1128,29 @@ export const CSListView = React.memo(() => {
 
         if (!result.destination) throw new Error("No destination");
 
-        const { index: srcIdx, droppableId: srcDroppableId } = result.source;
-        const { index: dstIdx, droppableId: dstDroppableId } =
-          result.destination;
+        // const { index: srcIdx, droppableId: srcDroppableId } = result.source;
+        // const { index: dstIdx, droppableId: dstDroppableId } =
+        //   result.destination;
 
-        if (
-          srcDroppableId === "CustomerServiceList" &&
-          dstDroppableId === "CustomerServiceList"
-        ) {
-        } else if (
-          srcDroppableId === "CustomerServiceList" &&
-          dstDroppableId.startsWith("status:")
-        ) {
-        } else if (
-          srcDroppableId.startsWith("status:") &&
-          dstDroppableId === "CustomerServiceList"
-        ) {
-        } else if (
-          srcDroppableId.startsWith("status:") &&
-          dstDroppableId.startsWith("status:")
-        ) {
-        } else {
-          throw new Error("Invalid destination");
-        }
+        // if (
+        //   srcDroppableId === "CustomerServiceList" &&
+        //   dstDroppableId === "CustomerServiceList"
+        // ) {
+        // } else if (
+        //   srcDroppableId === "CustomerServiceList" &&
+        //   dstDroppableId.startsWith("status:")
+        // ) {
+        // } else if (
+        //   srcDroppableId.startsWith("status:") &&
+        //   dstDroppableId === "CustomerServiceList"
+        // ) {
+        // } else if (
+        //   srcDroppableId.startsWith("status:") &&
+        //   dstDroppableId.startsWith("status:")
+        // ) {
+        // } else {
+        //   throw new Error("Invalid destination");
+        // }
 
         const droppableId = result.destination?.droppableId as string;
 
